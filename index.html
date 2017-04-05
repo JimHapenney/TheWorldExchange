@@ -12,14 +12,14 @@
     <script type="text/javascript" src="jquery.linq.min.js"></script>
     <script type="text/javascript" src="js.cookie-2.1.3.min.js"></script>
     <script type="text/javascript" src="lodash.js"></script>
-    <script type="text/javascript" src="ripple-min.js"></script>
+    <script type="text/javascript" src="ripple-0.17.1.js"></script>
     <script type="text/javascript" src="jquery.kinetic.min.js"></script>
     <script type="text/javascript" src="jquery.mousewheel.min.js"></script>
     <script type="text/javascript" src="jquery.smoothdivscroll-1.3-min.js"></script>
     <script type="text/javascript" src="jquery-ui-1.8.23.custom.min.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.min.js"></script>
-    <script type="text/javascript" src="xxxxxx.js"></script>
-    <link rel="stylesheet" href="xxxxxx.css">
+    <script type="text/javascript" src="20170404.js"></script>
+    <link rel="stylesheet" href="20170404.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="smoothDivScroll.css">
     <style type="text/css">
@@ -35,7 +35,7 @@
     
     <input type='hidden' name='submitted' value='submitted' />
     <div id='infoBar'>
-    <b>Learn More:</b> <a href='#about' onclick='document.getElementById("about").style.display="block";'>What is The World Exchange?</a>
+    <b>Learn More:</b> <a href='?about' onclick='document.getElementById("about").style.display="block"; return false;'>What is The World Exchange?</a>
     </div>
     <div id='navigation'>
     <span id='yourAccount' style='display:none;'>Your Account: <input id='account' type='text' readonly='readonly' value='' placeholder='Enter your account address here...' /></span><span id='welcome'>Welcome, <a href='#' onclick='showLogin();'>Login or Create an Account</a></span>
@@ -48,8 +48,8 @@
     </table>
     </div>
     
-    <div id='about'>
-      <div id='closeAbout'><p><a href='#' onclick='document.getElementById("about").style.display="none";'>[ Close ]</a></p></div>
+    <div id='about' >
+      <div id='closeAbout'><p><a href='/' onclick='document.getElementById("about").style.display="none"; return false;'>[ Close ]</a></p></div>
       <div style='padding-top:80px; padding-bottom:20px;'>
         <h3>What is The World Exchange?</h3>
         <h4>A free, open exchange<a href='#works' style='text-decoration:none; border:0;'>*</a> where anything can be traded, issued, and sent anywhere in real time.</h4>
@@ -103,7 +103,7 @@
           <li><a href='https://www.autodidactic.ai/' target='_blank'>Autodidactic I</a> - The creators of The World Exchange.</li>
           </ul>
           <p>&nbsp;</p>
-          <p style='text-align:right;'><a href='#' onclick='document.getElementById("about").style.display="none";'>[ Back to The World Exchange ]</a></p>
+          <p style='text-align:right;'><a href='/' onclick='document.getElementById("about").style.display="none"; return false;'>[ Back to The World Exchange ]</a></p>
       </div>
     </div>
     
@@ -165,6 +165,17 @@
       </div>
     </div>
     
+    <div id='destinationTagWindow' class='popup' style='display:none;'>
+      <div id='destinationTagContents'>
+        <h3>Add a destination tag for the transaction...</h3>
+        <div>
+        <input id='destinationTagInput' type='number' min='0' step='1' value='' placeholder='Enter an integer number note to attach...' onclick="this.select();" />
+        </div>
+        <div><input id='destinationTagSubmit' name='destinationTagSubmit' type='submit' value='Submit' /><input id='destinationTagCancel' name='destinationTagCancel' type='submit' value='Cancel' /></div>
+        <div class='disclaimer'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The destination tag is an optional integer note that you can attach to your transaction, like a description of a wire or check.  Sometimes, others will ask you to send your transaction with things like an order id, account number, etc.  The main usage so far is if the recipient address is shared by multiple people; the destination tag then helps make note of who specifically this transaction is for.</div>
+      </div>
+    </div>
+    
     <div id='header'>
     <h1>The World Exchange</h1>
     
@@ -219,7 +230,8 @@
               <div class='issuerLabels' id='issuer2Label' style='width:50%; text-align:right; visibility:hidden; margin-left:auto; '>
                 <div id='issuer2Width' style='width:30%; text-align:right;'>
                 <div style='padding-right:5%;'>
-                Backed by <span id='issuer2'> </span>
+                <div id='backedby2'>Backed by <span id='issuer2'> </span></div>
+                <div id='destinationTagLabel' style='display:none;'><a href='#' onclick='showDestinationTag();'>Set Destination Tag</a></div>
                 </div>
                 </div>
               </div>
