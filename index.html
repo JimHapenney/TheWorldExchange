@@ -22,9 +22,6 @@
     <link rel="stylesheet" href="20170404.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="smoothDivScroll.css">
-    <style type="text/css">
-      
-    </style>
 </head>
 <body>
 <div id='container'>
@@ -172,7 +169,7 @@
         <input id='destinationTagInput' type='number' min='0' step='1' value='' placeholder='Enter an integer number note to attach...' onclick="this.select();" />
         </div>
         <div><input id='destinationTagSubmit' name='destinationTagSubmit' type='submit' value='Submit' /><input id='destinationTagCancel' name='destinationTagCancel' type='submit' value='Cancel' /></div>
-        <div class='disclaimer'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The destination tag is an optional integer note that you can attach to your transaction, like a description of a wire or check.  Sometimes, others will ask you to send your transaction with things like an order id, account number, etc.  The main usage so far is if the recipient address is shared by multiple people; the destination tag then helps make note of who specifically this transaction is for.</div>
+        <div id='destinationTagInfo' class='disclaimer'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The destination tag is an optional integer note that you can attach to your transaction, like a description of a wire or check.  Sometimes, others will ask you to send your transaction with things like an order id, account number, etc.  The main usage so far is if the recipient address is shared by multiple people; the destination tag then helps make note of who specifically this transaction is for.</div>
       </div>
     </div>
     

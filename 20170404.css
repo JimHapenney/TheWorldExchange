@@ -277,6 +277,10 @@ a:hover{
   height:155px;
 }
 
+#destinationTagInfo {
+  height: 190px;
+}
+
 #issuerInfo{
   height: 220px;
 }
@@ -428,6 +432,10 @@ a:hover{
   .disclaimer {
     height:280px;
     font-size:9pt;
+  }
+  
+  #destinationTagInfo {
+    height: 400px;
   }
   
   #disclaimerAgreement {
