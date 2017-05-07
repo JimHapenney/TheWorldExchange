@@ -482,7 +482,7 @@ function loadOrderbook() {
         bidasktable += "<tr>" 
         +(j<bids.length? 
         "<td>"+bidurl+""+bids[j].direction+"</a></td>"
-        +"<td>"+bidurl+""+nFormatter(parseFloat(parseFloat(bids[j].qty).toFixed(Math.max(0, accuracy-Math.round(bids[j].qty).toString().length))), 2)+"</a></td>"
+        +"<td>"+bidurl+""+nFormatter(parseFloat(parseFloat(bids[j].qty).toFixed(Math.max(0, accuracy-Math.round(bids[j].qty).toString().length))), accuracy)+"</a></td>"
         +"<td>"+bids[j].symbol1+"</td>"
         +"<td>@</td>"
         +"<td>"+bidurlprice+nFormatter(bids[j].price, accuracy)+"</a></td>"
@@ -491,7 +491,7 @@ function loadOrderbook() {
         +"<td> </td>"
         +(j<asks.length? 
         "<td>"+askurl+""+asks[j].direction+"</a></td>"
-        +"<td>"+askurl+""+nFormatter(parseFloat(parseFloat(asks[j].qty).toFixed(Math.max(0, accuracy-Math.round(asks[j].qty).toString().length))), 2)+"</a></td>"
+        +"<td>"+askurl+""+nFormatter(parseFloat(parseFloat(asks[j].qty).toFixed(Math.max(0, accuracy-Math.round(asks[j].qty).toString().length))), accuracy)+"</a></td>"
         +"<td>"+asks[j].symbol1+"</td>"
         +"<td>@</td>"
         +"<td>"+askurlprice+nFormatter(asks[j].price, accuracy)+"</a></td>"
