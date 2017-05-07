@@ -95,6 +95,7 @@ function nFormatter(num, digits) {
     return num.toFixed(digits).replace(rx, "$1");
   }
   catch (err) { return num; }
+  return num;
 }
 
 function updateLoginMessage() {
@@ -498,54 +499,60 @@ function loadOrderbook() {
         :"<td colspan='"+cols+"'> </td>")+"</tr>";
       }
       
-      
-      if((mktcap1==0 || mktcapName1!=symbol1+"."+issuer1)) {
-        if(symbol1!=baseCurrency) {
-          var url = "https://data.ripple.com/v2/capitalization/"+symbol1+"+"+issuer1+"?limit=1&descending=true";
-          $.getJSON( url, function( data ) {
-            try {
-              mktcap1 = parseFloat(data.rows[0].amount).toFixed(0);
-              mktcapName1=symbol1+"."+issuer1;
-            }
-            catch (err) { mktcap1=0; }
-          });
-          if(mktcap1<askTotal) mktcap1 = askTotal;
+
+        if((mktcap1==0 || mktcapName1!=symbol1+"."+issuer1)) {
+          if(symbol1!=baseCurrency) {
+            var url = dataAPI+"/v2/capitalization/"+symbol1+"+"+issuer1+"?limit=1&descending=true";
+            $.get( url, function( data ) {
+                try {
+                  mktcap1 = parseFloat(data.rows[0].amount).toFixed(0);
+                  mktcapName1=symbol1+"."+issuer1;
+                }
+                catch (err) { 
+                  mktcap1=0;
+                }
+            }, "json" );
+            if(mktcap1<askTotal) mktcap1 = askTotal;
+          }
+          else {
+            var url = dataAPI+"/v2/network/xrp_distribution?limit=1&descending=true";
+            $.get( url, function( data ) {
+                try {
+                  mktcap1 = parseFloat(data.rows[0].total).toFixed(0);
+                  mktcapName1=symbol1+"."+issuer1;
+                }
+                catch (err) { 
+                  mktcap1=0; 
+                }
+            }, "json" );
+          }
         }
-        else {
-          var url = "https://data.ripple.com/v2/network/xrp_distribution?limit=1&descending=true";
-          $.getJSON( url, function( data ) {
-            try {
-              mktcap1 = parseFloat(data.rows[0].total).toFixed(0);
-              mktcapName1=symbol1+"."+issuer1;
-            }
-            catch (err) { mktcap1=0; }
-          });
+        if((mktcap2==0 || mktcapName2!=symbol2+"."+issuer2)) {
+          if(symbol2!=baseCurrency) {
+            var url = dataAPI+"/v2/capitalization/"+symbol2+"+"+issuer2+"?limit=1&descending=true";
+            $.get( url, function( data ) {
+                try {
+                  mktcap2 = parseFloat(data.rows[0].amount).toFixed(0);
+                  mktcapName2=symbol2+"."+issuer2;
+                }
+                catch (err) {
+                  mktcap2=0;
+                }
+            }, "json" );
+          }
+          else {
+            var url = dataAPI+"/v2/network/xrp_distribution?limit=1&descending=true";
+            $.get( url, function( data ) {
+                try {
+                  mktcap2 = parseFloat(data.rows[0].total).toFixed(0);
+                  mktcapName2=symbol1+"."+issuer2;
+                }
+                catch (err) { 
+                  mktcap2=0;
+                }
+            }, "json" );
+          }
         }
-      }
-      if((mktcap2==0 || mktcapName2!=symbol2+"."+issuer2)) {
-        if(symbol2!=baseCurrency) {
-          var url = "https://data.ripple.com/v2/capitalization/"+symbol2+"+"+issuer2+"?limit=1&descending=true";
-          $.getJSON( url, function( data ) {
-            try {
-              mktcap2 = parseFloat(data.rows[0].amount).toFixed(0);
-              mktcapName2=symbol2+"."+issuer2;
-            }
-            catch (err) {
-              mktcap2=0;
-            }
-          });
-        }
-        else {
-          var url = "https://data.ripple.com/v2/network/xrp_distribution?limit=1&descending=true";
-          $.getJSON( url, function( data ) {
-            try {
-              mktcap2 = parseFloat(data.rows[0].total).toFixed(0);
-              mktcapName2=symbol1+"."+issuer2;
-            }
-            catch (err) { mktcap2=0; }
-          });
-        }
-      }
       
       bidasktable+="<tr><td colspan='"+(cols)+"' style='text-align:left; width:40%; border-width:0px;'>"+(mktcap1>0? "Total "+symbol1+" Issued: "+nFormatter(mktcap1, 2):"")+"</td><td style='border-width:0; width:20%;'> </td><td colspan='"+(cols)+"' style='text-align:right; width:40%; border-width:0px;'>"+(mktcap2>0? "Total "+symbol2+" Issued: "+nFormatter(mktcap2, 2):"")+"</td></tr>";
       
@@ -586,7 +593,12 @@ function loadOrderbook() {
 }
 
 function updateURL() {
-  history.pushState(null, null, "/?action="+action+"&symbol1="+symbol1+(issuer1==""? "":"."+issuer1)+($("#qty1").val()==""? "":"&qty1="+$("#qty1").val())+(action=="send"? "&recipient="+$("#recipient").val():"&symbol2="+symbol2+(issuer2==""? "":"."+issuer2)+($("#price").val()!=""? "&price="+$("#price").val():"")));
+  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) )   
+  {
+  }
+  else {
+    history.pushState(null, null, "/?action="+action+"&symbol1="+symbol1+(issuer1==""? "":"."+issuer1)+($("#qty1").val()==""? "":"&qty1="+$("#qty1").val())+(action=="send"? "&recipient="+$("#recipient").val():"&symbol2="+symbol2+(issuer2==""? "":"."+issuer2)+($("#price").val()!=""? "&price="+$("#price").val():"")));
+  }
 }
 
 function updateAction() {
