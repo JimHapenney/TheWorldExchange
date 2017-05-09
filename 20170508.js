@@ -575,7 +575,7 @@ function loadOrderbook() {
           }
         }
       
-      bidasktable+="<tr><td colspan='"+(cols)+"' style='text-align:left; width:35%; border-width:0px;'>"+(mktcap1>0? "Total "+symbol1+" Issued: "+nFormatter(mktcap1, 2):"")+"</td><td style='border-width:0; width:30%; text-align:center;'>"+new Date(Date.now()).toLocaleTimeString()+"</td><td colspan='"+(cols)+"' style='text-align:right; width:35%; border-width:0px;'>"+(mktcap2>0? "Total "+symbol2+" Issued: "+nFormatter(mktcap2, 2):"")+"</td></tr>";
+      bidasktable+="<tr><td colspan='"+(cols-1)+"' style='text-align:left; border-width:0px;'>"+(mktcap1>0? "Total "+symbol1+" Issued: "+nFormatter(mktcap1, 2):"")+"</td><td colspan='3' style='border-width:0; text-align:center; overflow:hidden;'>"+new Date(Date.now()).toLocaleTimeString()+"</td><td colspan='"+(cols-1)+"' style='text-align:right; border-width:0px;'>"+(mktcap2>0? "Total "+symbol2+" Issued: "+nFormatter(mktcap2, 2):"")+"</td></tr>";
       
       bidasktable += "</table>";
       
