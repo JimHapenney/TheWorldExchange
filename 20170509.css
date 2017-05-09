@@ -115,7 +115,7 @@ a:hover{
   vertical-align:top;
 }
 #account{ width: 250px; text-align:right; border-width:2px; border-color:transparent; border-style:solid;}
-#balance, #orders { text-align:right; }
+#balance, #orders { text-align:right; min-width:240px; }
 #balance a, #orders span{ white-space:nowrap; }
 .issuerLabels { font-size:10pt; }
 
