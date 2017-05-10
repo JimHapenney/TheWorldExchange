@@ -6,7 +6,7 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-var api = new ripple.RippleAPI({server:'wss://s-west.ripple.com/'}); // s1.ripple.com, s-east.ripple.com, s-west.ripple.com
+var api = new ripple.RippleAPI({server:'wss://s1.ripple.com/'}); // s1.ripple.com, s-east.ripple.com, s-west.ripple.com
 var dataAPI = "https://data.ripple.com";
 var address = '';
 var key = '';
@@ -416,6 +416,9 @@ function loadOrderbook() {
         refreshLayout();
       }
       bookdepth = Math.max(3, Math.round((($('#container').height()- $("#topHalf").height() - $('#trade').outerHeight() - $("#errors").outerHeight() - $("footer").height())*.8)/($('#trade').height())));
+      
+      //if( /iPhone/i.test(navigator.userAgent) ) return null; // broken on iphone, freezes
+      
       return api.getOrderbook(address=="" || address.length<=10?  Object.keys(issuerNames)[0]:address, getPair(), {limit:bookdepth+5}); 
     }
     catch (ex) {
@@ -645,12 +648,7 @@ function loadOrderbook() {
 }
 
 function updateURL() {
-  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) )   
-  {
-  }
-  else {
-    history.pushState(null, null, "/?action="+action+"&symbol1="+symbol1+(issuer1==""? "":"."+issuer1)+($("#qty1").val()==""? "":"&qty1="+$("#qty1").val())+(action=="send"? "&recipient="+$("#recipient").val():"&symbol2="+symbol2+(issuer2==""? "":"."+issuer2)+($("#price").val()!=""? "&price="+$("#price").val():"")));
-  }
+  history.pushState(null, null, "/?action="+action+"&symbol1="+symbol1+(issuer1==""? "":"."+issuer1)+($("#qty1").val()==""? "":"&qty1="+$("#qty1").val())+(action=="send"? "&recipient="+$("#recipient").val():"&symbol2="+symbol2+(issuer2==""? "":"."+issuer2)+($("#price").val()!=""? "&price="+$("#price").val():"")));
 }
 
 function updateAction() {
@@ -1764,6 +1762,7 @@ $(document).ready(function() {
     if (hashTag === "#about" || hashTag=="#instant" || hashTag=="#represent" || hashTag=="#global" || hashTag=="#started" || hashTag=="#works" || hashTag=="#reading") 
       $("#about").css("display", "block");
     
+    $("#errors").html("Connecting... Please wait...");
     refreshLayout();
     
     try {
@@ -1800,6 +1799,8 @@ $(document).ready(function() {
             $("#symbol2").autocomplete({ source:symbolsList, minLength:0, select: function(event, ui) { document.getElementById('symbol2').value = ui.item.value; errored = false; $("#errors").html("&nbsp;"); issuer2 = ""; updateSymbol2(); updateURL(); }}).focus(function() {$(this).autocomplete('search', $(this).val())});
             
           }, "json" );
+          
+          $("#errors").html("&nbsp;");
       });
     }
     catch(er) {
