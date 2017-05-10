@@ -166,7 +166,7 @@ function loadAccount(loadOrderbookNext=false) {
     }, function (err) {
       console.log("Error in loadAccount: "+err);
     }).then(function() { 
-      if(address=="") return "";
+      if(address=="" || !api.isConnected()) return "";
       else {
         var info = "";
         try {
@@ -182,7 +182,7 @@ function loadAccount(loadOrderbookNext=false) {
         minBaseCurrency = baseReserve + baseIncrement*info.ownerCount;
       }
     }, function(err) { console.log("Error loading minBaseCurrency: "+err); }).then(function() { 
-      if(address=="") return "";
+      if(address=="" || !api.isConnected()) return "";
       else {
         var balances = "";
         try {
@@ -240,7 +240,7 @@ function loadAccount(loadOrderbookNext=false) {
     }, function(err) {
       console.log("Error building balances: "+err);
   }).then(function() { 
-    if(address=="") return "";
+    if(address=="" || !api.isConnected()) return "";
     else {
         var orders = "";
         try {
@@ -409,7 +409,7 @@ function loadOrderbook() {
       setTimeout(loadOrderbook, updateInterval*1000);
   }).then(function() {
     if(showOrderbook && getSelectedText()=="") updateSymbols();
-  }, function(err) { console.log("Error updating symbols before orderbook: "+err); }).then(function() { if(showOrderbook && getSelectedText()=="" && symbol1.length==3 && symbol2.length==3) {
+  }, function(err) { console.log("Error updating symbols before orderbook: "+err); }).then(function() { if(api.isConnected() && showOrderbook && getSelectedText()=="" && symbol1.length==3 && symbol2.length==3) {
     try {
       if(!errored && $.trim( $('#orderbook').html() ).length) {
         $("#errors").html("&nbsp;");
