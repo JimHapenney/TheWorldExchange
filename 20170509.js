@@ -19,6 +19,7 @@ var baseFee = 5;
 var baseCurrency = "XRP";
 var minBaseCurrency = 40;
 var updateInterval = 1; // seconds
+var reconnectInterval = 5; // number of intervals before reconnecting to reset connection
 var maxLedgerOffset = 100;
 var maxFee = "2000";
 
@@ -33,6 +34,10 @@ var mktcap2=0;
 var action = "";
 var lastIssuer = "";
 var destTag = "";
+
+var numIntervals = 0;
+var noDisconnecting = false;
+var reconnecting = false;
 
 var errored = false;
 
@@ -123,26 +128,41 @@ function loadAccount(loadOrderbookNext=false) {
     }
     updateLoginMessage();
     
-    try {
-      if(api.isConnected()) resolve();
-      else {
-        console.log('Disconnected in loadAccount');
-        try {
-          api.connect().then(function() {
-              console.log("Reconnected in loadAccount.");
-              resolve();
-          });
-        }
-        catch (er) {
-          console.log("Failed to reconnect in loadAccount: "+er);
+    if(!reconnecting) {
+      reconnecting = true;
+      try {
+        if(api.isConnected()) {
+          reconnecting = false;
           resolve();
         }
+        else {
+          console.log('Disconnected in loadAccount.');
+          try {
+            api.connect().then(function() {
+                console.log("Reconnected in loadAccount.");
+                reconnecting = false;
+                resolve();
+            }, function (err) {
+              console.log("Failed to reconnect in loadAccount: "+err);
+              reconnecting = false;
+              resolve();
+            });
+          }
+          catch (er) {
+            console.log("Failed to reconnect in loadAccount: "+er);
+            reconnecting = false;
+            resolve();
+          }
+        }
+      }
+      catch (erx) {
+        console.log("Error in loadAccount API: "+erx);
+        reconnecting = false;
+        resolve();
       }
     }
-    catch (erx) {
-      console.log("Error in loadAccount API: "+erx);
-      resolve();
-    }
+    else setTimeout(resolve, 5000);
+    
     }, function (err) {
       console.log("Error in loadAccount: "+err);
     }).then(function() { 
@@ -201,7 +221,10 @@ function loadAccount(loadOrderbookNext=false) {
             balanceOutput+="<a target='_blank' href='?qty1="+qty+"&amp;symbol1="+s+"' onclick='loadURLSymbol(\"\", "+qty+", \""+s+"\"); return false;'>"+parseFloat(holdings[s].toFixed(holdings[s]>1? 2:4)).toString()+" "+balances[i].currency+"</a>";
           }
         }
-        if(holdings.length<=1 && holdings[baseCurrency]<minBaseCurrency) { }
+        if(holdings.length<=1 && holdings[baseCurrency]<minBaseCurrency) {
+          console.log("No results from getBalances.");
+          console.log(balances);
+        }
         else if(balanceOutput!="") {
           $("#balanceLabel").css("visibility", "visible");
           $("#balanceLabel").css("display", "block");
@@ -262,36 +285,7 @@ function loadAccount(loadOrderbookNext=false) {
       $("#orders").css("visibility", "hidden");
       $("#orders").html("");
     }
-  }, function(er) { console.log("Error building orderbook: "+er); }).then(function() {
-      if(address=="") return "";
-      else {
-        var lines = "";
-        try {
-          lines = api.getTrustlines(address);
-        }
-        catch(err) {
-          console.log("Error getTrustlines: "+err);
-        }
-        return lines;
-      }
-  }, function (err) { console.log("Error getTrustlines: "+err); return ""; }).then(function(lines) {
-    trustlines = {}; var canReceive = "";
-    if(address!="" && lines) {
-      for(var i = 0; i<lines.length; i++) {
-        //if(parseFloat(lines[i].specification.limit)==0) continue;
-        if(!(lines[i].specification.currency in trustlines)) trustlines[lines[i].specification.currency] = {};
-        trustlines[lines[i].specification.currency][lines[i].specification.counterparty] = parseFloat(lines[i].specification.limit);
-      }
-    }
-    
-    try {
-      if(address!="" && key!="" && Object.keys(holdings).length==1 && Object.keys(trustlines).length==0 && holdings[baseCurrency]>minBaseCurrency) defaultTrustlines(0);
-    }
-    catch(err) {
-      console.log("Error defaultTrustlines(0): "+err);
-    }
-    
-  }, function(er) { console.log("Error compiling trustlines: "+er); }).then(function() {
+  }, function(er) { console.log("Error building orders: "+er); }).then(function() {
     if(address!="") {
       $("#history").html("<div><a href='#started' onclick='gettingStarted();'>Min "+baseCurrency+": "+minBaseCurrency.toString()+"</a> | <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set What Others Can Send You</a></div><div><a href='#started' onclick='gettingStarted();'>How to Fund / Deposit</a></div>");
       checkMinBaseCurrency();
@@ -303,6 +297,15 @@ function loadAccount(loadOrderbookNext=false) {
       $("#balance").css("display", "block");
       $("#history").html("");
     }
+  }, function(er) { console.log("Error printing orders: "+er); }).then(function() {
+    if(api.isConnected() && loadOrderbookNext && !noDisconnecting && !reconnecting) {
+      if(numIntervals>=reconnectInterval) {
+        numIntervals = 0;
+        return api.disconnect();
+      }
+      else numIntervals++;
+    }
+  }, function(er) { console.log("Error disconnecting after loadAccount: "+er); }).then(function() {
     if(loadOrderbookNext) {
       setTimeout(loadOrderbook, updateInterval*1000);
     }
@@ -365,26 +368,41 @@ function loadOrderbook() {
   try {
   //console.log("orderbook-entry: "+showOrderbook+", symbol1="+symbol1+", symbol2="+symbol2);
   new Promise(function(resolve, reject) {
-    try {
-      if(api.isConnected()) resolve();
-      else {
-        console.log('Disconnected in loadOrderbook, code:');
-        try {
-          api.connect().then(function() {
-              console.log("Reconnected in loadOrderbook.");
-              resolve();
-          });
-        }
-        catch (er) {
-          console.log("Failed to reconnect in loadOrderbook: "+er);
+    if(!reconnecting) {
+      reconnecting = true;
+      try {
+        if(api.isConnected()) {
+          reconnecting = false;
           resolve();
         }
+        else {
+          console.log('Disconnected in loadOrderbook.');
+          try {
+            api.connect().then(function() {
+                console.log("Reconnected in loadOrderbook.");
+                reconnecting = false;
+                resolve();
+            }, function (err) {
+              console.log("Failed to reconnect in loadOrderbook: "+err);
+              reconnecting = false;
+              resolve();
+            });
+          }
+          catch (er) {
+            console.log("Failed to reconnect in loadOrderbook: "+er);
+            reconnecting = false;
+            resolve();
+          }
+        }
+      }
+      catch (erx) {
+        console.log("Error in loadOrderbook API: "+erx);
+        reconnecting = false;
+        resolve();
       }
     }
-    catch (erx) {
-      console.log("Error in loadOrderbook API: "+erx);
-      resolve();
-    }
+    else setTimeout(resolve, 5000);
+    
   }, function (err) {
       console.log("Error in loadOrderbook: "+err);
       console.log("Restarting refresh cycle...");
@@ -908,32 +926,68 @@ function saveIssuer2() {
 function showTrustlines() {
   if(key=="") loginWarning();
   else {
-    $("#trustlinesTable").find("tr:gt(0)").remove();
-    var symbols = [];
-    for(var symbol in trustlines)
-      if($.inArray(symbol, symbols) === -1) symbols.push(symbol);
-    symbols.sort();
-    
-    var n = 0;
-    for(var i=0; i<symbols.length; i++) {
-      var backers = [];
-      for(var backer in trustlines[symbols[i]])
-        if($.inArray(backer, backers) === -1) backers.push(backer);
-      backers.sort(function(a,b) {
-          return  (a in issuerNames? issuerNames[a]:a) - (b in issuerNames? issuerNames[b]:b);
-      });
-      for(var j=0; j<backers.length; j++) {
-        if(trustlines[symbols[i]][backers[j]]>=0) {
-          $('#trustlinesTable').append("<tr><td id='trustSymbol"+n+"' class='trustSymbol'><div><input type='text' readonly='readonly' id='trustedSymbol"+n+"' name='trustedSymbol"+n+"' value='"+symbols[i]+"' style='opacity:.6;'  /></div></td><td id='trustIssuer"+n+"' class='trustIssuer'><div><input type='text' readonly='readonly' id='trustedIssuer"+n+"' name='trustedIssuer"+n+"' value='"+backers[j]+"' style='opacity:.6;' /></div></td><td id='trustLimit"+n+"' class='trustLimit'><div><input type='number' id='limit"+n+"' name='limit"+n+"' value='"+trustlines[symbols[i]][backers[j]]+"' /></div></td><td id='trustDelete"+n+"' class='trustDelete'><div><a href='#' onclick='$(\"#limit"+n+"\").val(0);'>[X]</a></div></td></tr>");
-          replaceTrustedAddressWithName("trustIssuer"+n, "trustedIssuer"+n, backers[j]);
+  
+    new Promise(function(resolve, reject) { 
+      if(address=="") return "";
+      else {
+        var lines = "";
+        try {
+          noDisconnecting = true;
+          lines = api.getTrustlines(address);
+          noDisconnecting = false;
         }
-        n++;
+        catch(err) {
+          console.log("Error getTrustlines: "+err);
+          noDisconnecting = false;
+        }
+        return lines;
       }
-    }
+    }, function (err) { console.log("Error getTrustlines: "+err); return ""; }).then(function(lines) {
+      trustlines = {}; var canReceive = "";
+      if(address!="" && lines) {
+        for(var i = 0; i<lines.length; i++) {
+          //if(parseFloat(lines[i].specification.limit)==0) continue;
+          if(!(lines[i].specification.currency in trustlines)) trustlines[lines[i].specification.currency] = {};
+          trustlines[lines[i].specification.currency][lines[i].specification.counterparty] = parseFloat(lines[i].specification.limit);
+        }
+      }
+      
+      try {
+        if(address!="" && key!="" && Object.keys(holdings).length==1 && Object.keys(trustlines).length==0 && holdings[baseCurrency]>minBaseCurrency) defaultTrustlines(0);
+      }
+      catch(err) {
+        console.log("Error defaultTrustlines(0): "+err);
+      }
+      
+    }, function(er) { console.log("Error compiling trustlines: "+er); }).then(function(lines) {
+  
+        $("#trustlinesTable").find("tr:gt(0)").remove();
+        var symbols = [];
+        for(var symbol in trustlines)
+          if($.inArray(symbol, symbols) === -1) symbols.push(symbol);
+        symbols.sort();
+        
+        var n = 0;
+        for(var i=0; i<symbols.length; i++) {
+          var backers = [];
+          for(var backer in trustlines[symbols[i]])
+            if($.inArray(backer, backers) === -1) backers.push(backer);
+          backers.sort(function(a,b) {
+              return  (a in issuerNames? issuerNames[a]:a) - (b in issuerNames? issuerNames[b]:b);
+          });
+          for(var j=0; j<backers.length; j++) {
+            if(trustlines[symbols[i]][backers[j]]>=0) {
+              $('#trustlinesTable').append("<tr><td id='trustSymbol"+n+"' class='trustSymbol'><div><input type='text' readonly='readonly' id='trustedSymbol"+n+"' name='trustedSymbol"+n+"' value='"+symbols[i]+"' style='opacity:.6;'  /></div></td><td id='trustIssuer"+n+"' class='trustIssuer'><div><input type='text' readonly='readonly' id='trustedIssuer"+n+"' name='trustedIssuer"+n+"' value='"+backers[j]+"' style='opacity:.6;' /></div></td><td id='trustLimit"+n+"' class='trustLimit'><div><input type='number' id='limit"+n+"' name='limit"+n+"' value='"+trustlines[symbols[i]][backers[j]]+"' /></div></td><td id='trustDelete"+n+"' class='trustDelete'><div><a href='#' onclick='$(\"#limit"+n+"\").val(0);'>[X]</a></div></td></tr>");
+              replaceTrustedAddressWithName("trustIssuer"+n, "trustedIssuer"+n, backers[j]);
+            }
+            n++;
+          }
+        }
 
-    dimBackground();
-    $("#trustlines").css("display", "block");
-    $("#trustlines").focus();
+        dimBackground();
+        $("#trustlines").css("display", "block");
+        $("#trustlines").focus();
+     });
   }
 }
 
@@ -1031,6 +1085,7 @@ function defaultTrustlines(itemToSubmit) {
           var options = {};
           options.maxFee = maxFee;
           options.maxLedgerVersionOffset = maxLedgerOffset;
+          noDisconnecting = true;
           api.prepareTrustline(address, line, options).then(function(prepared)
           {
               var transaction = "";
@@ -1047,17 +1102,21 @@ function defaultTrustlines(itemToSubmit) {
               if(transaction!="") {
                 console.log("Adding trust for "+symbol+" by "+majorIssuers[symbol][i]+"...");
                 api.submit(transaction).then(function(result) {
-                  loadAccount();
+                  //loadAccount();
                   
                   if(result.resultCode=="tesSUCCESS")
                    { }
-                  else console.log("Error setting default trustline for "+symbol+" by "+majorIssuers[symbol][i]+": "+result.resultMessage);
+                  else {
+                    console.log("Error setting default trustline for "+symbol+" by "+majorIssuers[symbol][i]+": "+result.resultMessage);
+                  }
                 }, function (err) {
                   console.log("Error setting default trustline for "+symbol+" by "+majorIssuers[symbol][i]+": "+err);
                 }).then(function() {
+                  noDisconnecting = false;
                   defaultTrustlines(itemToSubmit+1);
-                }, function(err) { console.log("Error defaultTrustlines: "+err); });
+                }, function(err) { console.log("Error defaultTrustlines: "+err); noDisconnecting = false; });
               }
+              else noDisconnecting = false;
           });
         }
         
@@ -1076,6 +1135,7 @@ function updateTrustline(issuer, symbol, qty, i, n) {
     var options = {};
     options.maxFee = maxFee;
     options.maxLedgerVersionOffset = maxLedgerOffset;
+    noDisconnecting = true;
     api.prepareTrustline(address, line, options).then(function(prepared)
     {
         var transaction = "";
@@ -1091,7 +1151,8 @@ function updateTrustline(issuer, symbol, qty, i, n) {
         
         if(transaction!="") {
           api.submit(transaction).then(function(result) {
-            loadAccount();
+            //loadAccount();
+            noDisconnecting = false;
             
             if(result.resultCode=="tesSUCCESS")
              $("#popupText").append("<br />Update for "+symbol+" by "+backer+" successfully completed.");
@@ -1109,8 +1170,10 @@ function updateTrustline(issuer, symbol, qty, i, n) {
             else $("#popupText").append("<br />All updates complete.");
           });
         }
+        else noDisconnecting = false;
     }, function (er) {
         $("#popupText").append("<br />Error preparing update for "+symbol+" by "+backer+": "+err);
+        noDisconnecting = false;
     });
   }
   else {
@@ -1163,6 +1226,7 @@ function cancelOrder(seq) {
       var options = {};
       options.maxFee = maxFee;
       options.maxLedgerVersionOffset = maxLedgerOffset;
+      noDisconnecting = false;
       api.prepareOrderCancellation(address, order, options).then(function(prepared)
       {
           var transaction = "";
@@ -1178,23 +1242,29 @@ function cancelOrder(seq) {
             refreshLayout();
           }
           
+          $("#errors").html("Submitting order cancellation... Please wait...");
+          
           if(transaction!="") {
             api.submit(transaction).then(function(result) {
               if(result.resultCode=="tesSUCCESS")
                 $("#errors").html("Order cancellation submitted.");
               else $("#errors").html("Cancellation submitted with result: "+result.resultMessage);
               errored = true;
-              loadAccount();
+              //loadAccount();
+              noDisconnecting = false;
               refreshLayout();
             }, function (err) {
               $("#errors").html("Error cancelling order: "+err);
               errored = true;
+              noDisconnecting = false;
               refreshLayout();
             });
           }
+          else noDisconnecting = false;
       }, function (er) {
           $("#errors").html("Error preparing to cancel order: "+err);
           errored = true;
+          noDisconnecting = false;
           refreshLayout();
       });
     }
@@ -1258,7 +1328,9 @@ function submitTransaction() {
           }
           else {
             try {
+              noDisconnecting = true;
               api.getTrustlines(recipient, {counterparty:issuer1, currency:symbol1}).then(function(lines) {
+                noDisconnecting = false;
                 if(lines) {
                   console.log(lines);
                   for(var i = 0; i<lines.length; i++) {
@@ -1272,7 +1344,7 @@ function submitTransaction() {
                 }
               });
             }
-            catch (er) { }
+            catch (er) { noDisconnecting = false; }
           }
           }).then(function() {
             if(!trusted && issuer1!=recipient) {
@@ -1307,6 +1379,7 @@ function submitTransaction() {
                 var options = {};
                 options.maxFee = maxFee;
                 options.maxLedgerVersionOffset = maxLedgerOffset;
+                noDisconnecting = false;
                 api.preparePayment(address, payment, options).then(function(prepared)
                   {
                     var transaction = "";
@@ -1323,23 +1396,29 @@ function submitTransaction() {
                       refreshLayout();
                     }
                     
+                    $("#errors").html("Submitting send transaction... Please wait...");
+                    
                     if(transaction!="") {
                       api.submit(transaction).then(function(result) {
                         if(result.resultCode=="tesSUCCESS")
                           $("#errors").html(qty+" "+$("#symbol1").val()+" <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>sent to "+recipient+(destTag==""? "":" (Destination Tag "+destTag+")")+"</a>!");
                         else $("#errors").html("Submitted with result: "+result.resultMessage+" <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Details...</a><br />Check <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>Account History</a> to confirm successful transaction.");
                         errored = true;
-                        loadAccount();
+                        //loadAccount();
+                        noDisconnecting = false;
                         refreshLayout();
                       }, function (err) {
                         $("#errors").html("Error sending to recipient: "+err);
                         errored = true;
+                        noDisconnecting = false;
                         refreshLayout();
                       });
                     }
+                    else noDisconnecting = false;
                 }, function (er) {
                     $("#errors").html("Error preparing to send: "+err);
                     errored = true;
+                    noDisconnecting = false;
                     refreshLayout();
                 });
               }
@@ -1416,6 +1495,7 @@ function submitTransaction() {
             var options = {};
             options.maxFee = maxFee;
             options.maxLedgerVersionOffset = maxLedgerOffset;
+            noDisconnecting = true;
             api.prepareOrder(address, order, options).then(function(prepared)
               {
                 var transaction = "";
@@ -1432,24 +1512,30 @@ function submitTransaction() {
                   refreshLayout();
                 }
                 
+                $("#errors").html("Submitting order request for "+action+" "+qty1+" "+symbol1+"... Please wait...");
+                
                 if(transaction!="") {
                   api.submit(transaction).then(function(result) {
                     if(result.resultCode=="tesSUCCESS")
-                      $("#errors").html("Order created to <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>"+action+" "+qty1+" "+symbol1+"</a>!");
-                    else $("#errors").html("Submitted with result: "+result.resultMessage+". <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Details...</a><br />Check <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>Account History</a> to confirm order or trade.");
+                      $("#errors").html("Order submitted to "+action+" "+qty1+" "+symbol1+"! <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>View Details...</a>");
+                    else $("#errors").html("Submitted with response: "+result.resultMessage+". <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Details...</a><br />Check <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>Account History</a> to confirm order or trade.");
                     errored = true;
-                    loadAccount();
+                    //loadAccount();
+                    noDisconnecting = false;
                     refreshLayout();
                   }, function (err) {
                     $("#errors").html("Error in "+action+" submission: "+err);
                     errored = true;
-                    loadAccount();
+                    noDisconnecting = false;
+                    //loadAccount();
                     refreshLayout();
                   });
                 }
+                else noDisconnecting = false;
             }, function (er) {
                 $("#errors").html("Error preparing to send: "+err);
                 errored = true;
+                noDisconnecting = false;
                 refreshLayout();
             });
           }
@@ -1480,10 +1566,12 @@ function undimBackground() {
 
 function createAccount() {
   try {
+    noDisconnecting = true;
     var newAccount = api.generateAddress();
     $("#accountInput").val(newAccount.address);
     $("#keyInput").val(newAccount.secret);
     $("#newAccountField").html("New account details above.<br />Save them before logging in!");
+    noDisconnecting = false;
   }
   catch (ex) {
     $("#newAccountField").html("Error creating account:<br /><small>"+ex+"</small>");
@@ -1685,12 +1773,15 @@ $(document).ready(function() {
           baseIncrement = parseFloat(info.validatedLedger.reserveIncrementXRP);
           baseFee = parseFloat(info.validatedLedger.baseFeeXRP);
         }
-      }).then( function() {loadAccount();
-      }, function(err) { console.log("Error starting loadAccount: "+err); }).then(function() {
+      }).then(function() {
          updateSymbols();
          refreshLayout();
          loadOrderbook(); 
-      }, function(err) { console.log("Error starting orderbook: "+err); }).then(function() {
+      }, function(err) { 
+        console.log("Error starting orderbook: "+err);
+        console.log("Retrying start orderbook...");
+        loadOrderbook(); 
+      }).then(function() {
           $.get( dataAPI+"/v2/gateways/", function( data ) {
             for(var symbol in data) {
               if(symbol.length>10) continue;
@@ -1722,14 +1813,22 @@ $(document).ready(function() {
     api.on('disconnected', (code) => {
       // code - [close code](https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent) sent by the server
       // will be 1000 if this was normal closure
+      if(!reconnecting) {
       console.log('Disconnected, code:', code);
-      try {
-        api.connect().then(function() {
-        console.log("Reconnected async.");
-        });
-      }
-      catch (er) {
-        console.log("Failed to reconnect async: "+er);
+        try {
+          reconnecting = true;
+          api.connect().then(function() {
+          console.log("Reconnected async.");
+          reconnecting = false;
+          }, function (err) { 
+          console.log("Failed to reconnect async: "+err);
+          reconnecting = false;
+          });
+        }
+        catch (er) {
+          console.log("Failed to reconnect async: "+er);
+          reconnecting = false;
+        }
       }
     });
     
