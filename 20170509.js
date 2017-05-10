@@ -6,7 +6,7 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-var api = new ripple.RippleAPI({server:'wss://s1.ripple.com/'});
+var api = new ripple.RippleAPI({server:'wss://s-west.ripple.com/'}); // s1.ripple.com, s-east.ripple.com, s-west.ripple.com
 var dataAPI = "https://data.ripple.com";
 var address = '';
 var key = '';
@@ -253,7 +253,7 @@ function loadAccount(loadOrderbookNext=false) {
       }
   }, function(err) {console.log("Error getOrders: "+err); return ""; }).then(function(orders) {
     var ordersOutput = "";
-    if(address!="" && orders) {
+    if(address!="" && orders!="") {
       for(var i=0; i<orders.length; i++) {
         if(ordersOutput!="") ordersOutput+="<br /> ";
         var direction = orders[i].specification.direction;
@@ -327,7 +327,7 @@ function checkMinBaseCurrency() {
     $("#balanceLabel").css("display", "hidden");
     $("#balanceLabel").css("display", "block");
     $("#balance").css("display", "block");
-    $("#balance").html("Your account needs <a href='#started' onclick='gettingStarted();'>>= "+minBaseCurrency+" "+baseCurrency+"</a> to use.<br />Ask someone to send some to you by sharing <a href='?action=send&amp;qty1="+minBaseCurrency+"&amp;symbol1="+baseCurrency+"&amp;recipient="+address+"' target='_blank'>this link</a>. <a href='#started' onclick='gettingStarted();'>Read more...</a>.");
+    $("#balance").html("Your account needs <a href='#started' onclick='gettingStarted();'>>= "+minBaseCurrency+" "+baseCurrency+"</a>.<br />Ask someone to send some to you by sharing <a href='?action=send&amp;qty1="+minBaseCurrency+"&amp;symbol1="+baseCurrency+"&amp;recipient="+address+"' target='_blank'>this link</a>. <a href='#started' onclick='gettingStarted();'>Read more...</a>.");
   }
 }
 
@@ -1229,6 +1229,8 @@ function cancelOrder(seq) {
       noDisconnecting = false;
       api.prepareOrderCancellation(address, order, options).then(function(prepared)
       {
+          $("#errors").html("Submitting order cancellation... Please wait...");
+          
           var transaction = "";
           var transactionID = -1;
           try {
@@ -1241,8 +1243,6 @@ function cancelOrder(seq) {
             errored = true;
             refreshLayout();
           }
-          
-          $("#errors").html("Submitting order cancellation... Please wait...");
           
           if(transaction!="") {
             api.submit(transaction).then(function(result) {
@@ -1382,6 +1382,8 @@ function submitTransaction() {
                 noDisconnecting = false;
                 api.preparePayment(address, payment, options).then(function(prepared)
                   {
+                    $("#errors").html("Submitting send transaction... Please wait...");
+                  
                     var transaction = "";
                     var transactionID = -1;
                     try {
@@ -1395,8 +1397,6 @@ function submitTransaction() {
                       errored = true;
                       refreshLayout();
                     }
-                    
-                    $("#errors").html("Submitting send transaction... Please wait...");
                     
                     if(transaction!="") {
                       api.submit(transaction).then(function(result) {
@@ -1475,20 +1475,22 @@ function submitTransaction() {
           errored = true;
         }
         else {
+          $("#errors").html("Submitting order request to "+action+" "+qty1+" "+symbol1+"... Please wait...");
+        
           var order = {};
           order.direction = trans;
           
-            order.quantity = {};
-            order.quantity.currency = symbol1;
-            order.quantity.value = ""+qty1;
-            if(issuer1!="" && (!(symbol1 in issuers) || $.inArray(issuer1, issuers[symbol1])>-1))
-              order.quantity.counterparty = issuer1;
-          
-            order.totalPrice = {};
-            order.totalPrice.currency = symbol2;
-            order.totalPrice.value = ""+(Math.round(price*qty1 * 1000000)/1000000);
-            if(issuer2!="" && symbol2!=baseCurrency && (!(symbol2 in issuers) || $.inArray(issuer2, issuers[symbol2])>-1))
-              order.totalPrice.counterparty = issuer2;
+          order.quantity = {};
+          order.quantity.currency = symbol1;
+          order.quantity.value = ""+qty1;
+          if(issuer1!="" && (!(symbol1 in issuers) || $.inArray(issuer1, issuers[symbol1])>-1))
+            order.quantity.counterparty = issuer1;
+        
+          order.totalPrice = {};
+          order.totalPrice.currency = symbol2;
+          order.totalPrice.value = ""+(Math.round(price*qty1 * 1000000)/1000000);
+          if(issuer2!="" && symbol2!=baseCurrency && (!(symbol2 in issuers) || $.inArray(issuer2, issuers[symbol2])>-1))
+            order.totalPrice.counterparty = issuer2;
 
           try {
             console.log(order);
@@ -1498,6 +1500,7 @@ function submitTransaction() {
             noDisconnecting = true;
             api.prepareOrder(address, order, options).then(function(prepared)
               {
+                
                 var transaction = "";
                 var transactionID = -1;
                 try {
@@ -1512,7 +1515,6 @@ function submitTransaction() {
                   refreshLayout();
                 }
                 
-                $("#errors").html("Submitting order request for "+action+" "+qty1+" "+symbol1+"... Please wait...");
                 
                 if(transaction!="") {
                   api.submit(transaction).then(function(result) {
