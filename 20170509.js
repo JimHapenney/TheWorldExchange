@@ -409,7 +409,7 @@ function loadOrderbook() {
       setTimeout(loadOrderbook, updateInterval*1000);
   }).then(function() {
     if(showOrderbook && getSelectedText()=="") updateSymbols();
-  }, function(err) { console.log("Error updating symbols before orderbook: "+err); }).then(function() { if(api.isConnected() && showOrderbook && getSelectedText()=="" && symbol1.length==3 && symbol2.length==3) {
+  }, function(err) { console.log("Error updating symbols before orderbook: "+err); }).then(function() { if(api.isConnected() && showOrderbook && getSelectedText()=="") {
     try {
       if(!errored && $.trim( $('#orderbook').html() ).length) {
         $("#errors").html("&nbsp;");
@@ -700,8 +700,6 @@ function updateSymbol1() {
   var symParts = document.getElementById('symbol1').value.split('.');
   document.getElementById('symbol1').value=symParts[0].toUpperCase()+(symParts.length>1? "."+symParts[1]:"");
   
-  if(symParts[0].length<3) return;
-  
   symbol1=symParts[0].toUpperCase();
   
   if(symParts.length>1) {
@@ -751,8 +749,6 @@ function updateSymbol1() {
 function updateSymbol2() {
   var symParts = document.getElementById('symbol2').value.split('.');
   document.getElementById('symbol2').value=symParts[0].toUpperCase()+(symParts.length>1? "."+symParts[1]:"");
-  
-  if(symParts[0].length<3) return;
   
   symbol2=symParts[0].toUpperCase();
   
@@ -925,14 +921,16 @@ function showTrustlines() {
   if(key=="") loginWarning();
   else {
   
-    new Promise(function(resolve, reject) { 
+    new Promise(function(resolve, reject) { resolve(); }).then(function() {
       if(address=="") return "";
       else {
         var lines = "";
         try {
           noDisconnecting = true;
+          $("#errors").html("Loading trustlines...");
           lines = api.getTrustlines(address);
           noDisconnecting = false;
+          console.log("Finished loading trustlines...");
         }
         catch(err) {
           console.log("Error getTrustlines: "+err);
@@ -941,7 +939,8 @@ function showTrustlines() {
         return lines;
       }
     }, function (err) { console.log("Error getTrustlines: "+err); return ""; }).then(function(lines) {
-      trustlines = {}; var canReceive = "";
+      console.log("Parsing trustlines...");
+      trustlines = {};
       if(address!="" && lines) {
         for(var i = 0; i<lines.length; i++) {
           //if(parseFloat(lines[i].specification.limit)==0) continue;
@@ -949,16 +948,17 @@ function showTrustlines() {
           trustlines[lines[i].specification.currency][lines[i].specification.counterparty] = parseFloat(lines[i].specification.limit);
         }
       }
-      
+      /*
       try {
         if(address!="" && key!="" && Object.keys(holdings).length==1 && Object.keys(trustlines).length==0 && holdings[baseCurrency]>minBaseCurrency) defaultTrustlines(0);
       }
       catch(err) {
         console.log("Error defaultTrustlines(0): "+err);
-      }
+      }*/
       
-    }, function(er) { console.log("Error compiling trustlines: "+er); }).then(function(lines) {
-  
+      }, function(er) { console.log("Error compiling trustlines: "+er); }).then(function(lines) {
+      
+        console.log("Building trustlines table...");
         $("#trustlinesTable").find("tr:gt(0)").remove();
         var symbols = [];
         for(var symbol in trustlines)
@@ -981,11 +981,12 @@ function showTrustlines() {
             n++;
           }
         }
-
+        console.log("Finished trustlines table...");
         dimBackground();
         $("#trustlines").css("display", "block");
         $("#trustlines").focus();
-     });
+        $("#errors").html("");
+     }, function(err) { console.log("Error loading trustlines: "+err); });
   }
 }
 
