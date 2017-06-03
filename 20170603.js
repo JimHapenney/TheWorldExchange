@@ -1218,7 +1218,7 @@ function cancelDestinationTag() {
 
 function loginWarning() {
   errored=true; 
-  $("#errors").html("You must <a href='#' onclick='showLogin();'>Login</a> first with your private key before doing anything.");
+  $("#errors").html("You must <a href='#' onclick='showLogin();'>Login</a> with your private key first to do that.");
   refreshLayout();
   $("#account").css("border-color", "red");
 }
