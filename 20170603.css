@@ -93,10 +93,6 @@ a:hover{
   border-color: transparent;
 }
 
-#footer a {
-  border-bottom: 0px;
-}
-
 #infoBar {float:left; width:400px; margin-right:-400px; font-size:12pt; text-align:left;}
 #welcome { font-size:12pt;}
 #orderbook { margin-top:12px; }
