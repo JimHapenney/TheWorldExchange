@@ -703,7 +703,7 @@ function updateAction() {
         showOrHideOrderbook();
         updateSymbols();
         if(action=='issue' && symbol1=="") 
-          $("#errors").html("Issue your own symbol for others trade and represent anything you can think of.<br />Symbols must be exactly 3 letters and cannot be 'XRP'.<br />Learn more in: <a href='#represent'>What is The World Exchange?</a>");
+          $("#errors").html("Issue your own symbol for others trade and represent anything you can think of.<br />Symbols must be exactly 3 letters and cannot be 'XRP'.<br /><br />Learn more in: <a href='#represent'>What is The World Exchange?</a>");
     }
     refreshLayout();
 }
