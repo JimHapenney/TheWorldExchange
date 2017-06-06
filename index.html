@@ -32,7 +32,7 @@
     
     <input type='hidden' name='submitted' value='submitted' />
     <div id='infoBar'>
-    <div><b>Learn More:</b> <a href='#about' onclick='document.getElementById("about").style.display="block"; setURL("#about"); jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500); return false;'>What is The World Exchange?</a></div>
+    <div><b>Learn More:</b> <a href='#about' onclick='document.getElementById("about").style.display="block"; setURL("#about"); jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 1000); return false;'>What is The World Exchange?</a></div>
     </div>
     <div id='navigation'>
     <span id='yourAccount' style='display:none;'>Your Account: <input id='account' type='text' readonly='readonly' value='' placeholder='Enter your account address here...' /></span><span id='welcome'>Welcome, <a href='#' onclick='showLogin();'>Login or Create an Account</a></span>
@@ -184,12 +184,11 @@
         </div>
      </div>
       <div id='footer'>
-      <br />© 2016 <a href='/'>The World Exchange</a> | <a target='_blank' href='mailto:contact@theworldexchange.net'>Contact@TheWorldExchange.Net</a> | Follow: <a target='_blank' href='https://twitter.com/WorldExchangeX'>@WorldExchangeX</a>
-      <br />A Fully Functional and Purely Client-Side Wallet Showcasing What's Possible with Blockchain
-      <br />Created by <a href="https://www.pftq.com/" target="_blank">pftq</a> of <a href='https://www.autodidactic.ai/' target='_blank'>Autodidactic I</a>
-       - Powered by <a target='_blank' href='https://en.wikipedia.org/wiki/Ripple_(payment_protocol)'>Ripple</a>
+      <div>© 2016 <a href='/'>The World Exchange</a> | <a target='_blank' href='mailto:contact@theworldexchange.net'>Contact@TheWorldExchange.Net</a> | Follow: <a target='_blank' href='https://twitter.com/WorldExchangeX'>@WorldExchangeX</a></div>
+      <div>A Fully Functional and Purely Client-Side Wallet Showcasing What's Possible with Blockchain</div>
+      <div>Created by <a href="https://www.pftq.com/" target="_blank">pftq</a> of <a href='https://www.autodidactic.ai/' target='_blank'>Autodidactic I</a>
+       - Powered by <a target='_blank' href='https://en.wikipedia.org/wiki/Ripple_(payment_protocol)'>Ripple</a> - Open-sourced on <a href='https://github.com/Autodidactic-I/TheWorldExchange' target='_blank'>Github</a></div>
       </div>
-      
       
       
     </form>
@@ -252,9 +251,11 @@
           <li><a href='https://www.autodidactic.ai/' target='_blank'>Autodidactic I</a> - The creators of The World Exchange.</li>
           </ul>
           <p>&nbsp;</p>
-          <p style='text-align:right;'><a href='/' onclick='jQuery("html,body").animate({scrollTop: jQuery("#container").offset().top}, 500); setURL(""); return false;'>[ Back to The World Exchange ]</a></p>
+          <p style='text-align:right;'><a href='/' onclick='jQuery("html,body").animate({scrollTop: jQuery("#container").offset().top}, 1000); setURL(""); return false;'>[ Back to The World Exchange ]</a></p>
       </div>
     </div>
+    
+
 
 </body>
 </html>
