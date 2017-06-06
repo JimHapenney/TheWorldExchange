@@ -418,8 +418,8 @@ function loadOrderbook() {
           $("#errors").html("&nbsp;");
           refreshLayout();
         }
-        else if($('#orderbook').html()!="Share the below link to let others trade your "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?action=buy&amp;symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />") {
-          $("#errors").html("Share the below link to let others trade your "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?action=buy&amp;symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
+        else if($('#orderbook').html()!="Share the below link to let others trade your "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />") {
+          $("#errors").html("Share the below link to let others trade your "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
           refreshLayout();
         }
       }
@@ -657,7 +657,7 @@ function loadOrderbook() {
 }
 
 function updateURL() {
-  history.pushState(null, null, "/?action="+action+"&symbol1="+symbol1+(issuer1==""? "":"."+issuer1)+($("#qty1").val()==""? "":"&qty1="+$("#qty1").val())+(action=="send"? "&recipient="+$("#recipient").val():"&symbol2="+symbol2+(issuer2==""? "":"."+issuer2)+($("#price").val()!=""? "&price="+$("#price").val():"")));
+  history.pushState(null, null, "/?"+(action=="buy"? "":"action="+action+"&")+"symbol1="+symbol1+(issuer1==""? "":"."+issuer1)+($("#qty1").val()==""? "":"&qty1="+$("#qty1").val())+(action=="send"? ($("#recipient").val()==""? "":"&recipient="+$("#recipient").val()):"&symbol2="+symbol2+(issuer2==""? "":"."+issuer2)+($("#price").val()!=""? "&price="+$("#price").val():"")));
 }
 
 function setURL(url) {
@@ -1546,7 +1546,7 @@ function submitTransaction() {
                 if(transaction!="") {
                   api.submit(transaction).then(function(result) {
                     var issueInfo = "";
-                    if(action=="issue") issueInfo = "<br /><br />Share the below link to let others trade your newly issued "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?action=buy&amp;symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />";
+                    if(action=="issue") issueInfo = "<br /><br />Share the below link to let others trade your newly issued "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />";
                     if(result.resultCode=="tesSUCCESS")
                       $("#errors").html("Order submitted to "+action+" "+qty1+" "+symbol1+"! <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Transaction Details...</a>"+issueInfo);
                     else $("#errors").html("Submitted with response: "+result.resultMessage+".<br /><a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>Check Transaction Details</a> after a few minutes to confirm if successful."+issueInfo);
