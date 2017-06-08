@@ -287,7 +287,7 @@ function loadAccount(loadOrderbookNext=false) {
     }
   }, function(er) { console.log("Error building orders: "+er); }).then(function() {
     if(address!="") {
-      $("#history").html("<div><a href='#started' onclick='gettingStarted();'>Min "+baseCurrency+": "+minBaseCurrency.toString()+"</a> | <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set What Others Can Send You</a></div><div><a href='#started' onclick='gettingStarted();'>How to Fund / Deposit</a></div>");
+      $("#history").html("<div><a href='#started' onclick='gettingStarted(); return false;'>Min "+baseCurrency+": "+minBaseCurrency.toString()+"</a> | <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set What Others Can Send You</a></div><div><a href='#started' onclick='gettingStarted(); return false;'>How to Fund / Deposit</a></div>");
       checkMinBaseCurrency();
       refreshLayout();
     }
