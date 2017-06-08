@@ -49,7 +49,7 @@ body {
 }
 #trade {
   margin-top:10%;
-  padding-bottom:15px;
+  padding-bottom:20px;
 }
 
 select, input{
@@ -107,7 +107,7 @@ a:hover{
 
 #infoBar {float:left; width:400px; margin-right:-400px; font-size:12pt; text-align:left;}
 #welcome { font-size:12pt;}
-#orderbook { margin-top:20px; }
+#orderbook { margin-top:30px; }
 #orderbook table { text-align:center; margin:auto;  }
 #orderbook td, th { border-width: 0px 0px 1px 0px; border-style: solid; border-color: #DDD; padding: 3px; font-size:12pt;  text-align:right; }
 #navigation, #subnavigation { text-align:right; font-size:12pt;}
@@ -424,7 +424,7 @@ a:hover{
 
   
   .issuerLabels { font-size:14pt; }
-  #orderbook {  padding-top: 20px; }
+  #orderbook {  padding-top: 0px; }
   #orderbook td, #orderbook th { font-size:19pt;}
   #infoBar{ font-size:24pt; float:none; padding-bottom:20px; text-align:center; font-weight:bold; }
   #welcome { font-size:24pt; text-align:center;}
