@@ -221,6 +221,11 @@ a:hover{
   z-index:999;
   display:none;
   padding:30px;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  min-height: 1px;
+  max-height: 999999px;
 }
 
 .popup h3{
@@ -256,6 +261,11 @@ a:hover{
   height: 350px;
   overflow:auto;
   padding:0px 10px 0px 10px;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  min-height: 1px;
+  max-height: 999999px;
 }
 
 .settings{
@@ -270,6 +280,11 @@ a:hover{
   margin-bottom:20px;
   overflow:auto;
   height:145px;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  min-height: 1px;
+  max-height: 999999px;
 }
 
 #destinationTagInfo {
@@ -439,7 +454,11 @@ a:hover{
     margin-left:-400px;  
     margin-top:-350px;
     font-size:20pt;
-    max-height:99999px;
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    -ms-text-size-adjust: none;
+    min-height: 1px;
+    max-height: 999999px;
   }
   .popup input, .popup select {
     font-size:20pt;
@@ -450,6 +469,11 @@ a:hover{
   
   .info {
     height: 600px;
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    -ms-text-size-adjust: none;
+    min-height: 1px;
+    max-height: 999999px;
   }
   
   
@@ -460,7 +484,11 @@ a:hover{
   .disclaimer {
     height:350px;
     font-size:16pt;
-    max-height:99999px;
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    -ms-text-size-adjust: none;
+    min-height: 1px;
+    max-height: 999999px;
   }
   
   #destinationTagInfo {
