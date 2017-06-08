@@ -19,7 +19,7 @@ body {
   overflow:hidden;
 }
 #containerpadding {
-  padding: 15px 15px 5px 15px;
+  padding: 10px 15px 5px 15px;
   height:100%;
 }
 #contents {
@@ -82,7 +82,7 @@ input.linkShare {
   color:#FFF;
   font-family:"Trebuchet MS";
   font-size:10pt;
-  padding-top:5px;
+  padding-top:8px;
   padding-bottom:5px;
 }
 
