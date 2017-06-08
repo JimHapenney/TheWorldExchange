@@ -289,7 +289,7 @@ function loadAccount(loadOrderbookNext=false) {
     if(address!="") {
       $("#history").html("<div><a href='#started' onclick='gettingStarted();'>Min "+baseCurrency+": "+minBaseCurrency.toString()+"</a> | <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set What Others Can Send You</a></div><div><a href='#started' onclick='gettingStarted();'>How to Fund / Deposit</a></div>");
       checkMinBaseCurrency();
-      //refreshLayout();
+      refreshLayout();
     }
     else {
       $("#balanceLabel").css("display", "hidden");
@@ -628,9 +628,10 @@ function loadOrderbook() {
       if(getSelectedText()=="") {
         if(showOrderbook) {
           if(true) {
-            var change = (bidasktable!="") && ($('#orderbook').html()=="");
+            //var change = (bidasktable!="") && ($('#orderbook').html()=="");
             if(bidasktable!="") $("#orderbook").html(bidasktable);
-            if(change) refreshLayout();
+            //if(change) 
+            refreshLayout();
           }
         }
         else {
@@ -823,14 +824,21 @@ function showOrHideOrderbook() {
 }
 
 function refreshLayout() {
-  $('#container').css('height', Math.round($(window).height()*.98)+'px');
+  var temp = Math.round($(window).height()*.98);
   
-  $('#trade').css('margin-top', Math.round(Math.max(50, ($('#container').height()*.42- $("#topHalf").height() - $("#trade").height())))+'px');
+  if(Math.abs(temp-parseInt($('#container').css('height')))>2)
+    $('#container').css('height', temp+'px');
+  
+  temp = Math.round(Math.max(50, ($('#container').height()*.42- $("#topHalf").height() - $("#trade").height())));
+  if(Math.abs(temp-parseInt($('#trade').css('height')))>2)
+    $('#trade').css('margin-top', temp+'px');
   
   if(action!="send" && $("#issuer2Width").length && Math.abs($("#counterparty").width()-$("#issuer2Width").width())>5) $("#issuer2Width").css("width", Math.round($("#counterparty").width())+"px");
   else if(action=="send" && $("#issuer2Width").length && Math.abs(1.15*$("#recipient").width()-$("#issuer2Width").width())>5) $("#issuer2Width").css("width", Math.round(1.15*$("#recipient").width())+"px");
   
-  $('#footer').css('margin-top', Math.round(Math.max(10, (($('#container').height()-$('#content').height()-$('#footer').height()-20))))+'px');
+  temp = Math.round(Math.max(10, (($('#container').height()-$('#content').height()-$('#footer').height()-20))));
+  if(Math.abs(temp-parseInt($('#trade').css('height')))>2)
+    $('#footer').css('margin-top', temp+'px');
 }
 
 function showLogin() {
