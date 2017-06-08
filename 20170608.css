@@ -107,7 +107,7 @@ a:hover{
 
 #infoBar {float:left; width:400px; margin-right:-400px; font-size:12pt; text-align:left;}
 #welcome { font-size:12pt;}
-#orderbook { margin-top:12px; }
+#orderbook { margin-top:20px; }
 #orderbook table { text-align:center; margin:auto;  }
 #orderbook td, th { border-width: 0px 0px 1px 0px; border-style: solid; border-color: #DDD; padding: 3px; font-size:12pt;  text-align:right; }
 #navigation, #subnavigation { text-align:right; font-size:12pt;}
