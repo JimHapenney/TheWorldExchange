@@ -287,7 +287,7 @@ function loadAccount(loadOrderbookNext=false) {
     }
   }, function(er) { console.log("Error building orders: "+er); }).then(function() {
     if(address!="") {
-      $("#history").html("<div><a href='#started' onclick='gettingStarted(); return false;'>Min "+baseCurrency+": "+minBaseCurrency.toString()+"</a> | <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set What Others Can Send You</a></div><div><a href='#started' onclick='gettingStarted(); return false;'>How to Fund / Deposit</a></div>");
+      $("#history").html("<div><a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>Min "+baseCurrency+": "+minBaseCurrency.toString()+"</a> | <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set What Others Can Send You</a></div><div><a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>How to Fund / Deposit</a></div>");
       checkMinBaseCurrency();
       refreshLayout();
     }
@@ -317,19 +317,12 @@ function loadAccount(loadOrderbookNext=false) {
   });
 }
 
-function gettingStarted() {
-  $("#about").css("display", "block"); 
-  jQuery("html,body").animate({scrollTop: jQuery("#started").offset().top}, 1000);
-  setURL("#started");
-  return false;
-}
-
 function checkMinBaseCurrency() {
   if(holdings[baseCurrency]<minBaseCurrency) {
     $("#balanceLabel").css("display", "hidden");
     $("#balanceLabel").css("display", "block");
     $("#balance").css("display", "block");
-    $("#balance").html("Your account needs <a href='#started' onclick='gettingStarted();'>>= "+minBaseCurrency+" "+baseCurrency+"</a>.");
+    $("#balance").html("Your account needs <a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>&gt;= "+minBaseCurrency+" "+baseCurrency+"</a>.");
   }
 }
 
@@ -422,8 +415,8 @@ function loadOrderbook() {
     catch (ex) {
       showOrderbook = false;
       if(action!="issue") {
-        $("#errors").html("No orderbook for symbols "+symbol1+" / "+symbol2+" found. Check spelling or issuer/backer.");
         errored = true;
+        $("#errors").html("No orderbook for symbols "+symbol1+" / "+symbol2+" found. Check spelling or issuer/backer.");
       }
       //refreshLayout();
     }
@@ -441,8 +434,8 @@ function loadOrderbook() {
         refreshLayout();
       }
       else if(action=="issue" && orderbook!=null && Math.max(orderbook.bids.length, orderbook.asks.length)>0) {
-        $("#errors").html("Share the below link to let others trade your "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
         errored=true;
+        $("#errors").html("Share the below link to let others trade your "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
         refreshLayout();
       }
     }
@@ -760,12 +753,12 @@ function updateSymbol1() {
   }
   
   if(symbol1!="" && action=="issue" && issuer1=="" && address!="") {
-    $("#errors").html("Invalid symbol to issue. Choose a different name to issue your own symbol.");
     errored = true;
+    $("#errors").html("Invalid symbol to issue. Choose a different name to issue your own symbol.");
   }
   else if(symbol1.length>0 && symbol1.length!=3) {
-    $("#errors").html("Symbols must be exactly 3 letters.");
     errored = true;
+    $("#errors").html("Symbols must be exactly 3 letters.");
     refreshLayout();
   }
   else if(!errored) $("#errors").html("&nbsp;");
@@ -809,8 +802,8 @@ function updateSymbol2() {
   }
   
   if(symbol2.length>0 && symbol2.length!=3) {
-    $("#errors").html("Symbols must be exactly 3 letters.");
     errored = true;
+    $("#errors").html("Symbols must be exactly 3 letters.");
     refreshLayout();
   }
   
@@ -1306,31 +1299,31 @@ function cancelOrder(seq) {
             transactionID = result.id;
           }
           catch(er) {
-            $("#errors").html("Error signing order to cancel: "+er);
             errored = true;
+            $("#errors").html("Error signing order to cancel: "+er);
             refreshLayout();
           }
           
           if(transaction!="") {
             api.submit(transaction).then(function(result) {
+              errored = true;
               if(result.resultCode=="tesSUCCESS")
                 $("#errors").html("Order cancellation submitted.");
               else $("#errors").html("Cancellation submitted with result: "+result.resultMessage);
-              errored = true;
               //loadAccount();
               noDisconnecting = false;
               refreshLayout();
             }, function (err) {
-              $("#errors").html("Error cancelling order: "+err);
               errored = true;
+              $("#errors").html("Error cancelling order: "+err);
               noDisconnecting = false;
               refreshLayout();
             });
           }
           else noDisconnecting = false;
       }, function (er) {
-          $("#errors").html("Error preparing to cancel order: "+err);
           errored = true;
+          $("#errors").html("Error preparing to cancel order: "+err);
           noDisconnecting = false;
           refreshLayout();
       });
@@ -1362,28 +1355,28 @@ function submitTransaction() {
         var qty = parseFloat($("#qty1").val());
         var recipient = $("#recipient").val();
         if(qty<=0 || !$.isNumeric(qty)) {
-          $("#errors").html("Please specify qty above 0.");
           errored = true;
+          $("#errors").html("Please specify qty above 0.");
           refreshLayout();
         }
         else if(!symbol1) {
-          $("#errors").html("Please input a valid symbol.");
           errored = true;
+          $("#errors").html("Please input a valid symbol.");
           refreshLayout();
         }
         else if(symbol1.length!=3) {
-          $("#errors").html("Symbols must be exactly 3 letters.");
           errored = true;
+          $("#errors").html("Symbols must be exactly 3 letters.");
           refreshLayout();
         }
         else if(!issuer1 && !(symbol1 in issuers && issuers[symbol1].length==0)) {
-          $("#errors").html("Please specify issuer's address for the symbol in the format Symbol.Issuer");
           errored = true;
+          $("#errors").html("Please specify issuer's address for the symbol in the format Symbol.Issuer");
           refreshLayout();
         }
         else if(!recipient) {
-          $("#errors").html("Please specify recipient address.");
           errored = true;
+          $("#errors").html("Please specify recipient address.");
           refreshLayout();
         }
         else {
@@ -1415,8 +1408,8 @@ function submitTransaction() {
           }
           }).then(function() {
             if(!trusted && issuer1!=recipient) {
-              $("#errors").html("Error: Recipient does not accept "+symbol1+" issued by "+(issuer1 in issuerNames? issuerNames[issuer1]:issuer1)+". Ask Recipient to <a href='#' onclick='aboutReceivables();'>Set What Others Can Send [Them]</a>.");
               errored = true;
+              $("#errors").html("Error: Recipient does not accept "+symbol1+" issued by "+(issuer1 in issuerNames? issuerNames[issuer1]:issuer1)+". Ask Recipient to <a href='#' onclick='aboutReceivables();'>Set What Others Can Send [Them]</a>.");
               refreshLayout();
             }
             else {
@@ -1460,38 +1453,38 @@ function submitTransaction() {
                       transactionID = result.id;
                     }
                     catch(er) {
-                      $("#errors").html("Error signing transaction to send: "+er);
                       errored = true;
+                      $("#errors").html("Error signing transaction to send: "+er);
                       refreshLayout();
                     }
                     
                     if(transaction!="") {
                       api.submit(transaction).then(function(result) {
+                        errored = true;
                         if(result.resultCode=="tesSUCCESS")
                           $("#errors").html(qty+" "+$("#symbol1").val()+" <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>sent to "+recipient+(destTag==""? "":" (Destination Tag "+destTag+")")+"</a>!");
                         else $("#errors").html("Submitted with result: "+result.resultMessage+" <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Details...</a><br />Check <a href='https://bithomp.com/explorer/"+address+"' target='_blank'>Account History</a> to confirm successful transaction.");
-                        errored = true;
                         //loadAccount();
                         noDisconnecting = false;
                         refreshLayout();
                       }, function (err) {
-                        $("#errors").html("Error sending to recipient: "+err);
                         errored = true;
+                        $("#errors").html("Error sending to recipient: "+err);
                         noDisconnecting = false;
                         refreshLayout();
                       });
                     }
                     else noDisconnecting = false;
                 }, function (er) {
-                    $("#errors").html("Error preparing to send: "+err);
                     errored = true;
+                    $("#errors").html("Error preparing to send: "+err);
                     noDisconnecting = false;
                     refreshLayout();
                 });
               }
               catch(ex) {
-                $("#errors").html("Error sending: "+ex);
                 errored = true;
+                $("#errors").html("Error sending: "+ex);
                 refreshLayout();
               }
             }
@@ -1503,43 +1496,43 @@ function submitTransaction() {
         var qty1 = parseFloat($("#qty1").val());
         var price = parseFloat($("#price").val());
         if(qty1<=0 || !$.isNumeric(qty1)) {
-          $("#errors").html("Please specify qty above 0.");
           errored = true;
+          $("#errors").html("Please specify qty above 0.");
           refreshLayout();
         }
         else if(!symbol1) {
-          $("#errors").html("Please input a valid symbol.");
           errored = true;
+          $("#errors").html("Please input a valid symbol.");
           refreshLayout();
         }
         else if(!issuer1 && !(symbol1 in issuers && issuers[symbol1].length==0)) {
-          $("#errors").html("Please specify issuer's address for "+symbol2+" in the format Symbol.Issuer");
           errored = true;
+          $("#errors").html("Please specify issuer's address for "+symbol2+" in the format Symbol.Issuer");
           refreshLayout();
         }
         else if(price<=0 || !$.isNumeric(price)) {
-          $("#errors").html("Please specify price above 0.");
           errored = true;
+          $("#errors").html("Please specify price above 0.");
           refreshLayout();
         }
         else if(!symbol2) {
-          $("#errors").html("Please input a valid symbol.");
           errored = true;
+          $("#errors").html("Please input a valid symbol.");
           refreshLayout();
         }
         else if(!issuer2 && !(symbol2 in issuers && issuers[symbol2].length==0)) {
-          $("#errors").html("Please specify issuer's address for "+symbol2+" in the format Symbol.Issuer");
           errored = true;
+          $("#errors").html("Please specify issuer's address for "+symbol2+" in the format Symbol.Issuer");
           refreshLayout();
         }
         else if(symbol1.length!=3 || symbol2.length!=3) {
-          $("#errors").html("Symbols must be exactly 3 letters.");
           errored = true;
+          $("#errors").html("Symbols must be exactly 3 letters.");
           refreshLayout();
         }
         else if(symbol1!="" && action=="issue" && issuer1=="" && address!="") {
-          $("#errors").html("Invalid symbol to issue. Choose a different name to issue your own symbol.");
           errored = true;
+          $("#errors").html("Invalid symbol to issue. Choose a different name to issue your own symbol.");
         }
         else {
           $("#errors").html("Submitting order request to "+action+" "+qty1+" "+symbol1+"... Please wait...");
@@ -1577,8 +1570,8 @@ function submitTransaction() {
                   transactionID = result.id;
                 }
                 catch(er) {
-                  $("#errors").html("Error signing transaction to "+action+": "+er);
                   errored = true;
+                  $("#errors").html("Error signing transaction to "+action+": "+er);
                   refreshLayout();
                 }
                 
@@ -1586,17 +1579,17 @@ function submitTransaction() {
                 if(transaction!="") {
                   api.submit(transaction).then(function(result) {
                     var issueInfo = "";
+                    errored = true;
                     if(action=="issue") issueInfo = "<br /><br />Share the below link to let others trade your newly issued "+symbol1+":<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />";
                     if(result.resultCode=="tesSUCCESS")
                       $("#errors").html("Order submitted to "+action+" "+qty1+" "+symbol1+"! <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Transaction Details...</a>"+issueInfo);
                     else $("#errors").html("Submitted with response: "+result.resultMessage+".<br /><a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>Check Transaction Details</a> after a few minutes to confirm if successful."+issueInfo);
-                    errored = true;
                     //loadAccount();
                     noDisconnecting = false;
                     refreshLayout();
                   }, function (err) {
-                    $("#errors").html("Error in "+action+" submission: "+err);
                     errored = true;
+                    $("#errors").html("Error in "+action+" submission: "+err);
                     noDisconnecting = false;
                     //loadAccount();
                     refreshLayout();
@@ -1604,15 +1597,15 @@ function submitTransaction() {
                 }
                 else noDisconnecting = false;
             }, function (er) {
-                $("#errors").html("Error preparing to send: "+err);
                 errored = true;
+                $("#errors").html("Error preparing to send: "+err);
                 noDisconnecting = false;
                 refreshLayout();
             });
           }
           catch(ex) {
-            $("#errors").html("Error "+action+"ing: "+ex);
             errored = true;
+            $("#errors").html("Error "+action+"ing: "+ex);
             refreshLayout();
           }
         }
