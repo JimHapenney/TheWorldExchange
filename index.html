@@ -23,6 +23,15 @@
     <link rel="stylesheet" href="20170719.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="smoothDivScroll.css">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#a8a8a8">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
 </head>
 <body>
 <div id='particles-js'>
@@ -260,9 +269,14 @@
     </div>
     
        <script>
-        particlesJS.load('particles-js', 'particles.json', function() {
-          console.log('callback - particles.js config loaded');
-        });
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) )
+          particlesJS.load('particles-js', 'particles-mobile.json', function() {
+            console.log('callback - particles.js config loaded');
+          });
+        else
+          particlesJS.load('particles-js', 'particles.json', function() {
+            console.log('callback - particles.js config loaded');
+          });
         $("#particles-js").css("height", ($(window).height()-70-5)+"px");
         $("#loginBackground").css("height", ($(window).height())+"px");
       </script>
