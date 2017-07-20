@@ -198,7 +198,7 @@ a:hover{
   height:100%;   /* adjust as per your needs */
   background-color:#AAA;
   opacity:.5;
-  padding:15px;
+  padding:0px;
   z-index:998;
   display:none;
   max-height: 999999px;
