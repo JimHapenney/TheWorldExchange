@@ -108,7 +108,7 @@ a:hover{
 #infoBar {float:left; width:400px; margin-right:-400px; font-size:12pt; text-align:left; }
 #welcome { font-size:12pt;}
 #orderbook { margin-top:30px; }
-#orderbook table { text-align:center; margin:auto;  border-color:#FFF; border-style: double; border-width:5px; opacity:.75;  }
+#orderbook table { text-align:center; margin:auto;  border-color:#FFF; border-style: double; border-width:5px; opacity:.75; min-width:35%; }
 #orderbook td, th { border-width: 0px 0px 1px 0px; border-style: solid; border-color: #333; padding: 3px; font-size:12pt;  text-align:right; color:#000; background-color:#FFF; }
 #navigation, #subnavigation { text-align:right; font-size:12pt;}
 #subnavigation { margin-left:-330px; width:330px; float:right; margin-top:25px;}
