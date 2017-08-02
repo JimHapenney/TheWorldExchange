@@ -3,7 +3,7 @@ www.theworldexchange.net
 
 Very simple, "vanilla" site demonstrating much of Ripple/XRP's capabilities through their API, including but not limited to:
 - Trading of symbols (buy/sell)
-- Issuing new symbols
+- Issuing new symbols, including Ripple's KYC features like allowing only authorized token holders.
 - Sending/receiving symbols
 - Bid/ask books for any symbol.
 - Fully client-side implementation for all the benefits of a "cold wallet" (no storing or passing of information on remote servers), including the ability to both generate and verify valid wallets/addresses completely offline by saving the webpage to your desktop.
