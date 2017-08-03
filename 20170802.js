@@ -2349,10 +2349,11 @@ $(document).ready(function() {
       }
     });
     
-    function selectServer() {
-      server = servers[Math.floor(Math.random()*servers.length)];
-      console.log("Server selected: "+server);
-      api = new ripple.RippleAPI({server:server});
-    }
     
 });
+
+function selectServer() {
+  server = servers[Math.floor(Math.random()*servers.length)];
+  console.log("Server selected: "+server);
+  api = new ripple.RippleAPI({server:server});
+}
