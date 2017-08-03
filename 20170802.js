@@ -248,12 +248,7 @@ function loadAccount(loadOrderbookNext=false) {
             var counterparty = ""+balances[i].counterparty;
             if(balances[i].value<0) counterparty = address;
             var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
-            if(!(balances[i].currency in issuers)) {
-              issuers[balances[i].currency] = [];
-              var symbolsList = symbolLister();
-              $("#symbol1").autocomplete({ source:symbolsList});
-              $("#symbol2").autocomplete({ source:symbolsList});
-            }
+
             if(counterparty!="undefined" && balances[i].currency!=baseCurrency && $.inArray(counterparty, issuers[balances[i].currency])==-1) {
               issuers[balances[i].currency][issuers[balances[i].currency].length] = counterparty;
             }
@@ -268,7 +263,7 @@ function loadAccount(loadOrderbookNext=false) {
               issuers[balances[i].currency] = [];
               updateIssuers = true;
             }
-            if(issuers[balances[i].currency].indexOf(balances[i].counterparty)<0) {
+            if(counterparty!="undefined" && issuers[balances[i].currency].indexOf(balances[i].counterparty)<0) {
               issuers[balances[i].currency].push(balances[i].counterparty);
               updateIssuers = true;
             }
@@ -334,7 +329,7 @@ function loadAccount(loadOrderbookNext=false) {
           issuers[symbol1] = [];
           updateIssuers = true;
         }
-        if(issuers[symbol1].indexOf(counterparty1)<0) {
+        if(counterparty1!="undefined" && issuers[symbol1].indexOf(counterparty1)<0) {
           issuers[symbol1].push(counterparty1);
           updateIssuers = true;
         }
@@ -342,7 +337,7 @@ function loadAccount(loadOrderbookNext=false) {
           issuers[symbol2] = [];
           updateIssuers = true;
         }
-        if(issuers[symbol2].indexOf(counterparty2)<0) {
+        if(counterparty2!="undefined" && issuers[symbol2].indexOf(counterparty2)<0) {
           issuers[symbol2].push(counterparty2);
           updateIssuers = true;
         }
