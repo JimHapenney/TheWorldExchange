@@ -846,7 +846,7 @@ function updateSymbol1() {
   
   if(issuer1!="" || action =="issue") {
     $("#issuer1Label").css("visibility", "visible");
-    $("#issuer1").html("<a href='#' onclick='"+(action=="issue"? "showIssuerYou();":"showIssuer1();")+"'>"+(issuer1==address || action=="issue" ? "You":(issuer1 in issuerNames? issuerNames[issuer1]:issuer1))+"</a>");
+    $("#issuer1").html("<a href='#' onclick='"+(action=="issue"? "showIssuerYou();":"showIssuer1();")+"'>"+(issuer1==address || action=="issue" ? "You":(issuer1 in issuerNames? issuerNames[issuer1]:issuer1.substring(0, 12)+"..."))+"</a>");
   }
   else {
     $("#issuer1Label").css("visibility", "hidden");
@@ -894,7 +894,7 @@ function updateSymbol2() {
   if(issuer2!="") {
     //console.log("issuer2="+issuer2);
     $("#issuer2Label").css("visibility", "visible");
-    $("#issuer2").html("<a href='#' onclick='showIssuer2();'>"+(issuer2==address? "You":(issuer2 in issuerNames? issuerNames[issuer2]:issuer2))+"</a>");
+    $("#issuer2").html("<a href='#' onclick='showIssuer2();'>"+(issuer2==address? "You":(issuer2 in issuerNames? issuerNames[issuer2]:issuer2.substring(0, 12)+"..."))+"</a>");
   }
   else {
     //console.log("issuer2 hidden");
@@ -2348,7 +2348,6 @@ $(document).ready(function() {
         }
       }
     });
-    
     
 });
 
