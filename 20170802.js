@@ -248,10 +248,6 @@ function loadAccount(loadOrderbookNext=false) {
             var counterparty = ""+balances[i].counterparty;
             if(balances[i].value<0) counterparty = address;
             var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
-
-            if(counterparty!="undefined" && balances[i].currency!=baseCurrency && $.inArray(counterparty, issuers[balances[i].currency])==-1) {
-              issuers[balances[i].currency][issuers[balances[i].currency].length] = counterparty;
-            }
             
             holdings[s] = parseFloat(balances[i].value);
             var act = holdings[s]>0? "sell":"buy";
