@@ -251,6 +251,7 @@ a:hover{
   width:90%;
 }
 
+
 .popup div{
   margin-bottom:5px;
 }
@@ -298,6 +299,10 @@ a:hover{
   -ms-text-size-adjust: none;
   min-height: 1px;
   max-height: 999999px;
+}
+
+#settingsInfo {
+  max-height: 90px;
 }
 
 #destinationTagInfo {
@@ -487,9 +492,6 @@ a:hover{
     font-size:20pt;
     max-height: 999999px;
   }
-  .popup td.right{
-    width:55%;
-  }
   
   .info {
     height: 600px;
@@ -503,6 +505,11 @@ a:hover{
   
   #issuerInfo{
     height: 450px;
+  }
+  
+  
+  .popup td.right{
+    width:65%;
   }
 
   .disclaimer {
