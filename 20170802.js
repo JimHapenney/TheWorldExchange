@@ -247,19 +247,19 @@ function loadAccount(loadOrderbookNext=false) {
             if(balanceOutput!="") balanceOutput+=", ";
             var counterparty = ""+balances[i].counterparty;
             if(balances[i].value<0) counterparty = address;
-            var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
+            var s = balances[i].currency + (counterparty!="" && counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
             
             holdings[s] = parseFloat(balances[i].value);
             var act = holdings[s]>0? "sell":"buy";
             var qty = Math.abs(holdings[s]);
             
-            balanceOutput+="<a target='_blank' href='?qty1="+qty+"&amp;symbol1="+s+"' onclick='loadURLSymbol(\"\", "+qty+", \""+s+"\"); return false;'>"+parseFloat(holdings[s].toFixed(holdings[s]>1? 2:4)).toString()+" "+balances[i].currency+"</a>";
+            balanceOutput+="<a target='_blank' href='?qty1="+qty+"&amp;symbol1="+s+"' onclick='loadURLSymbol(\"\", "+qty+", \""+s+"\"); return false;'>"+parseFloat(holdings[s].toFixed(holdings[s]>1? 2:4)).toString()+" "+balances[i].currency+"</a> ";
             
             if(!(balances[i].currency in issuers)) {
               issuers[balances[i].currency] = [];
               updateIssuers = true;
             }
-            if(counterparty!="undefined" && issuers[balances[i].currency].indexOf(balances[i].counterparty)<0) {
+            if(counterparty!="" && counterparty!="undefined" && issuers[balances[i].currency].indexOf(balances[i].counterparty)<0) {
               issuers[balances[i].currency].push(balances[i].counterparty);
               updateIssuers = true;
             }
@@ -315,8 +315,8 @@ function loadAccount(loadOrderbookNext=false) {
         var symbol1 = ""+orders[i].specification.quantity.currency;
         var symbol2 = ""+orders[i].specification.totalPrice.currency;
         var price = parseFloat(orders[i].specification.totalPrice.value)/parseFloat(orders[i].specification.quantity.value);
-        var s1 = symbol1 + (counterparty1!="undefined" && (!(symbol1 in issuers) || (issuers[symbol1].length>0))? "."+counterparty1:"");
-        var s2 = symbol2 + (counterparty2!="undefined" && (!(symbol2 in issuers) || (issuers[symbol2].length>0))? "."+counterparty2:"");
+        var s1 = symbol1 + (counterparty1!=""&&counterparty1!="undefined" && (!(symbol1 in issuers) || (issuers[symbol1].length>0))? "."+counterparty1:"");
+        var s2 = symbol2 + (counterparty2!=""&&counterparty2!="undefined" && (!(symbol2 in issuers) || (issuers[symbol2].length>0))? "."+counterparty2:"");
         var orderSeq = orders[i].properties.sequence;
         
         ordersOutput+="<span style='white-space:nowrap;'><a href='#' onclick='cancelOrder("+orderSeq+"); this.style.display = \"none\"'>[X]</a> <a target='_blank' href='?action="+direction+"&amp;qty1="+qty+"&amp;symbol1="+s1+"&amp;price="+price+"&amp;symbol2="+s2+"' onclick='loadURLSymbols(\""+direction+"\", "+qty+", \""+s1+"\", "+price+", \""+s2+"\"); return false;'>"+direction+" "+parseFloat(qty.toFixed(qty>1? 2:4)).toString()+" "+symbol1+" @ "+parseFloat(price.toFixed(price>1? 2:4)).toString()+" "+symbol2+"</a></span>";
@@ -325,7 +325,7 @@ function loadAccount(loadOrderbookNext=false) {
           issuers[symbol1] = [];
           updateIssuers = true;
         }
-        if(counterparty1!="undefined" && issuers[symbol1].indexOf(counterparty1)<0) {
+        if(counterparty1!="" && counterparty1!="undefined" && issuers[symbol1].indexOf(counterparty1)<0) {
           issuers[symbol1].push(counterparty1);
           updateIssuers = true;
         }
@@ -333,7 +333,7 @@ function loadAccount(loadOrderbookNext=false) {
           issuers[symbol2] = [];
           updateIssuers = true;
         }
-        if(counterparty2!="undefined" && issuers[symbol2].indexOf(counterparty2)<0) {
+        if(counterparty2!="" && counterparty2!="undefined" && issuers[symbol2].indexOf(counterparty2)<0) {
           issuers[symbol2].push(counterparty2);
           updateIssuers = true;
         }
@@ -492,11 +492,13 @@ function loadOrderbook(repeat = true) {
       return api.getOrderbook(address=="" || address.length<=10?  Object.keys(issuerNames)[0]:address, getPair(), {limit:bookdepth+5}); 
     }
     catch (ex) {
-      showOrderbook = false;
+      if(numIntervals>1) showOrderbook = false;
       if(action!="issue") {
-        errored = true;
-        $("#errors").html("No orderbook for tokens "+symbol1+" / "+symbol2+" found. Check spelling or issuer/backer.");
-        console.log("No orderbook for "+symbol1+"."+issuer1+" / "+symbol2+"."+issuer2);
+        if(numIntervals>1) {
+          errored = true;
+          $("#errors").html("No orderbook for tokens "+symbol1+" / "+symbol2+" found. Check spelling or issuer/backer.");
+        }
+        console.log("No orderbook for "+symbol1+"."+issuer1+" / "+symbol2+"."+issuer2+": "+ex);
       }
       //refreshLayout();
     }
@@ -784,8 +786,8 @@ function updateAction() {
       }
       else if($("#symbol1").val()=="" && lastIssuer=="") {
         $("#symbol1").val(baseCurrency); symbol1=baseCurrency;
-        if($("#symbol2").val()==baseCurrency) {
-          $("#symbol2").val("USD"); symbol2="USD";
+        if($("#symbol2").val()==baseCurrency || $("#symbol2").val()=="") {
+          $("#symbol2").val("USD"); symbol2="USD"; issuer2=majorIssuers["USD"][0];
         }
       }
     }
@@ -960,7 +962,7 @@ function logout() {
   $("#keyInput").val("");
   $("#accountInput").val("");
   $("#account").val("");
-  $("#keyInput").prop("placeholder", "Enter secret key...");
+  $("#keyInput").prop("placeholder", "Can be left blank for read-only mode.");
   key="";
   holdings = {};
   holdings[baseCurrency]=0;
@@ -983,6 +985,10 @@ function saveLogin() {
         var pair = api.deriveKeypair($("#keyInput").val());
         if(pair) {
           var publicKey = pair.publicKey;
+          
+          // If account field is blank, we can just generate it from the secret key (technically only the secret is needed)
+          if($("#accountInput").val()=="") $("#accountInput").val(api.deriveAddress(publicKey));
+          
           if(api.deriveAddress(publicKey)==$("#accountInput").val()) {
             validKey = true;
             saveLogin2(validKey, error);
@@ -1028,7 +1034,8 @@ function saveLogin2(validKey, error) {
     var tempKey = $("#keyInput").val();
     if(tempKey) key = tempKey;
     $("#keyInput").val("");
-    $("#keyInput").prop("placeholder", "-- Secret Key Hidden --");
+    if(key) $("#keyInput").prop("placeholder", "-- Secret Key Hidden --");
+    else $("#keyInput").prop("placeholder", "-- None entered. Read-only mode. --");
     holdings = {};
     holdings[baseCurrency]=0;
     loadAccount();
@@ -1039,7 +1046,7 @@ function saveLogin2(validKey, error) {
   else {
     $("#newAccountField").html("Error: Secret key is invalid for the account address."+error);
     $("#keyInput").css("border-color", "red");
-    $("#keyInput").prop("placeholder", "Enter secret key...");
+    $("#keyInput").prop("placeholder", "Can be left blank for read-only mode.");
     console.log("Login failed: "+error);
   }
   loggingIn = false;
@@ -1157,7 +1164,7 @@ function getTrustlines() {
 }
 
 function showTrustlines() {
-  if(key=="") loginWarning();
+  if(address=="") loginWarning();
   else {
     if(settings["requireAuthorization"]) {
       $("#trustlinesTitle").html("Set Authorized Token Holders");
@@ -1291,34 +1298,37 @@ function addTrustline() {
 
 function saveTrustlines() {
   hideTrustlines();
-  $("#errors").html("&nbsp;");
-  showPopup("Updating "+(settings["requireAuthorization"]? "authorized token holders":"receivable tokens")+"...", "Updating "+(settings["requireAuthorization"]? "Authorized Token Holders":"Receivable Tokens")+"...");
-  
-  var n = $('#trustlinesTable tr').length-1;
-  var updates = false;
-  var symbol = "";
-  var issuer = "";
-  var limit = 0;
-  var approved = true;
-  var ix = 0;
-  for(var i=0; i<n; i++) {
-    symbol = $("#trustedSymbol"+i).val();
-    issuer = $("#trustedIssuer"+i).val();
-    if(symbol=="" || issuer == "" ) continue;
-    try {
-      limit = settings["requireAuthorization"]? 0:parseFloat($("#limit"+i).val());
+  if(address=="" || key=="") loginWarning();
+  else {
+    $("#errors").html("&nbsp;");
+    showPopup("Updating "+(settings["requireAuthorization"]? "authorized token holders":"receivable tokens")+"...", "Updating "+(settings["requireAuthorization"]? "Authorized Token Holders":"Receivable Tokens")+"...");
+    
+    var n = $('#trustlinesTable tr').length-1;
+    var updates = false;
+    var symbol = "";
+    var issuer = "";
+    var limit = 0;
+    var approved = true;
+    var ix = 0;
+    for(var i=0; i<n; i++) {
+      symbol = $("#trustedSymbol"+i).val();
+      issuer = $("#trustedIssuer"+i).val();
+      if(symbol=="" || issuer == "" ) continue;
+      try {
+        limit = settings["requireAuthorization"]? 0:parseFloat($("#limit"+i).val());
+      }
+      catch(ex) { limit = 0; }
+      if(settings["requireAuthorization"]) approved = $("#approved"+i).val()=="true";
+      else approved = false;
+      ix = i;
+      if(!(symbol in trustlines) || !(issuer in trustlines[symbol]) || limit!=trustlines[symbol][issuer] || (settings["requireAuthorization"] && approved == false) || (limit==0 && !settings["requireAuthorization"])) {
+        updates = true;
+        break;
+      }
     }
-    catch(ex) { limit = 0; }
-    if(settings["requireAuthorization"]) approved = $("#approved"+i).val()=="true";
-    else approved = false;
-    ix = i;
-    if(!(symbol in trustlines) || !(issuer in trustlines[symbol]) || limit!=trustlines[symbol][issuer] || (settings["requireAuthorization"] && approved == false) || (limit==0 && !settings["requireAuthorization"])) {
-      updates = true;
-      break;
-    }
+    if(updates) updateTrustline(issuer, symbol, limit, approved, ix, n);
+    else $("#popupText").append("<br />No updates to process.  All done.");
   }
-  if(updates) updateTrustline(issuer, symbol, limit, approved, ix, n);
-  else $("#popupText").append("<br />No updates to process.  All done.");
 }
 
 function hideTrustlines() {
@@ -1476,7 +1486,7 @@ function getSettings() {
 }
 
 function showSettings() {
-  if(key=="" || address=="") loginWarning();
+  if(address=="") loginWarning();
   else {
     console.log("Loading settings...");
     noDisconnecting = true;
@@ -1550,6 +1560,10 @@ function saveSettings() {
     else {
       saveSetting(submittedSettings, 0);
     }
+  }
+  else {
+    hideSettings();
+    loginWarning();
   }
 }
 
@@ -2206,7 +2220,7 @@ $(document).ready(function() {
     
     var hashTag = window.location.hash;
 
-    if (hashTag === "#about" || hashTag=="#instant" || hashTag=="#represent" || hashTag=="#global" || hashTag=="#started" || hashTag=="#works" || hashTag=="#reading") {
+    if (hashTag === "#about" || hashTag=="#instant" || hashTag=="#represent" || hashTag=="#global" || hashTag.indexOf("#started")>=0 || hashTag=="#works" || hashTag=="#reading") {
       $("#about").css("display", "block");
       jQuery("html,body").animate({scrollTop: jQuery(hashTag).offset().top}, 1000);
     }
