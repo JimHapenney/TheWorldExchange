@@ -336,7 +336,10 @@ function loadAccount(loadOrderbookNext=false) {
         }
         
         // Create display of balances
-        for(var s in holdings) {
+        var sortedHoldings = Object.keys(holdings).sort(function(a,b){return holdings[a]-holdings[b]});
+        for(var i = 0; i<sortedHoldings.length; i++) {
+          var s = sortedHoldings[i];
+          
           if(holdings[s] == 0) continue;
           
           var act = holdings[s]>0? "sell":"buy";
