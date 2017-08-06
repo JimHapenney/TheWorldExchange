@@ -285,7 +285,7 @@ function loadAccount(loadOrderbookNext=false) {
         console.log(sheet);
         
         // Parse balanceSheet object to extract holdings as positive and obligations (issuances) as negatives
-        if(address!="" && sheet!=null && sheet!="" && ((sheet.assets && sheet.assets.length>0 || sheet.obligations && sheet.obligations.length>0))) {
+        if(address!="" && sheet!=null && sheet!="" && ((sheet.assets!=null && sheet.assets.length>0) || (sheet.obligations!=null && sheet.obligations.length>0))) {
           
           console.log("Building holdings from getBalanceSheet...");
           
@@ -296,32 +296,36 @@ function loadAccount(loadOrderbookNext=false) {
           var updateIssuers = false;
           
           // Holdings as positive
-          var balances = sheet.assets;
-          for(var i=0; i<balances.length; i++) {
-            if(balances[i].value==0) continue;
-            if(balanceOutput!="") balanceOutput+=", ";
-            var counterparty = ""+balances[i].counterparty;
-            if(balances[i].value<0) counterparty = address;
-            var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
-            
-            if(!(s in holdings)) holdings[s] = 0;
-            
-            holdings[s] += parseFloat(balances[i].value);
-            
+          if(sheet.assets) {
+            var balances = sheet.assets;
+            for(var i=0; i<balances.length; i++) {
+              if(balances[i].value==0) continue;
+              if(balanceOutput!="") balanceOutput+=", ";
+              var counterparty = ""+balances[i].counterparty;
+              if(balances[i].value<0) counterparty = address;
+              var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
+              
+              if(!(s in holdings)) holdings[s] = 0;
+              
+              holdings[s] += parseFloat(balances[i].value);
+              
+            }
           }
           
           // Obligations (issuances) as negatives
-          var balances = sheet.obligations;
-          for(var i=0; i<balances.length; i++) {
-            if(balances[i].value==0) continue;
-            if(balanceOutput!="") balanceOutput+=", ";
-            var counterparty = ""+balances[i].counterparty;
-            if(balances[i].value<0) counterparty = address;
-            var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
-            
-            if(!(s in holdings)) holdings[s] = 0;
-            
-            holdings[s] -= parseFloat(balances[i].value);
+          if(sheet.obligations) {
+            var balances = sheet.obligations;
+            for(var i=0; i<balances.length; i++) {
+              if(balances[i].value==0) continue;
+              if(balanceOutput!="") balanceOutput+=", ";
+              var counterparty = ""+balances[i].counterparty;
+              if(balances[i].value<0) counterparty = address;
+              var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
+              
+              if(!(s in holdings)) holdings[s] = 0;
+              
+              holdings[s] -= parseFloat(balances[i].value);
+            }
           }
         }
         else {
@@ -364,7 +368,7 @@ function loadAccount(loadOrderbookNext=false) {
         
         
         // Most likely new accounts not funded; should do nothing and let the fund your account message show (later below)
-        if(address!="" && (holdings.length<1 || holdings[baseCurrency]<minBaseCurrency)) {
+        if(address!="" && (Object.keys(holdings).length<1 || holdings[baseCurrency]<minBaseCurrency)) {
           console.log("No results from getBalances.");
           console.log(balances);
         }
@@ -396,7 +400,7 @@ function loadAccount(loadOrderbookNext=false) {
         orders = api.getOrders(address);
       }
       catch(err) {
-        console.log("Error getOrders: "+err); 
+        console.log("Error api.getOrders: "+err); 
       }
       return orders;
     }
