@@ -1145,7 +1145,7 @@ function updateMarketCap1() {
               }
             }
           }
-        }, function(err) {console.log("Error mktcap1 getBalanceSheet: "+err)}).then(function() {
+        }, function(err) {console.log("Error mktcap1 getBalanceSheet: "+err);}).then(function() {
 
           // Look up using the Data API if the above fails
           if(mktcap1==0) {
@@ -1161,7 +1161,7 @@ function updateMarketCap1() {
                 }
             }, "json" );
           }
-        }, function(err) {console.log("Error mktcap1 data API: "+err)});
+        }, function(err) {console.log("Error mktcap1 data API: "+err);});
       }
       else {
       
@@ -1201,7 +1201,7 @@ function updateMarketCap2() {
                 }
               }
             }
-          }, function(err) {console.log("Error mktcap2 getBalanceSheet: "+err)}).then(function() {
+          }, function(err) {console.log("Error mktcap2 getBalanceSheet: "+err);}).then(function() {
             
             // Check Data API if above fails
             if(mktcap2==0) {
@@ -1216,7 +1216,7 @@ function updateMarketCap2() {
                   }
               }, "json" );
             }
-          }, function(err) {console.log("Error mktcap2 data API: "+err)});
+          }, function(err) {console.log("Error mktcap2 data API: "+err);});
       }
       else {
       
@@ -1591,11 +1591,11 @@ function showIssuer(symbol, issuer) {
 function sortDropDownListByText(selectId) {
     var foption = $('#'+ selectId + ' option:first');
     var soptions = $('#'+ selectId + ' option:not(:first)').sort(function(a, b) {
-       return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
+       return a.text == b.text ? 0 : a.text < b.text ? -1 : 1;
     });
     $('#' + selectId).html(soptions).prepend(foption);              
 
-};
+}
 
 // Hide the issuer selection window
 function hideIssuer() {
