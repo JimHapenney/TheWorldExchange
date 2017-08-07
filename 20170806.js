@@ -23,7 +23,7 @@ var chatWallet = "rfaSyhoQmHQaFv8qNoWaALNPQf7pa7sm7Q"; // wallet used for storin
 var accuracy = 8;
 var bookdepth = 8;
 var updateInterval = 2; // seconds
-var chatUpdateInterval = 2; // seconds
+var chatUpdateInterval = 5; // seconds
 var reconnectInterval = 600; // number of intervals before reconnecting to reset connection, reduces stale connections etc
 var maxLedgerOffset = 100; // High number of maxLedger errors during heavy trading periods if we leave it at default
 var maxFee = "2000"; // Would rather overpay than not see my order go through during heavy trading
@@ -167,6 +167,14 @@ function nFormatter(num, digits) {
   }
   catch (err) { return num; }
   return num;
+}
+
+// For cleaning HTML from strings, especially chat messages
+function stripHTML(dirtyString) {
+  var container = document.createElement('div');
+  var text = document.createTextNode(dirtyString);
+  container.appendChild(text);
+  return container.innerHTML; // innerHTML will be a xss safe string
 }
 
 // Replace welcome message with login state or vice versa
@@ -1445,6 +1453,9 @@ function refreshLayout() {
 
 // Show the login window
 function showLogin() {
+  // Hide for logged in users in case they want to be on the safe side
+  closeChat();
+
   $("#accountInput").val(address);
   $("#keyInput").val("");
   $("#disclaimerRead").prop("checked", false);
@@ -2783,39 +2794,47 @@ function runChat() {
       options.start=lastChat;
     }
   }
-  else printChat("Welcome to The World Exchange chatbox, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to everyone else on the network. Each message costs a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") due to transaction cost of the network but nothing more.<br /><hr />");
+  else { // only first time page runs do we show this
+    printChat("Welcome to The World Exchange chatbox, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to everyone else on the network. Each message costs a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") due to transaction cost of the network but nothing more.<br /><hr />");
+    lastChat = null;
+  }
   
-  var chatAPI = new ripple.RippleAPI({server:chatServer});;
-  chatAPI.connect().then(function() {
-    return chatAPI.getTransactions(chatWallet, options );
-  }, function(err) { console.log("Error connecting to chat server: "+err); return null; })
-  .then(function (transactions) {
-    if(transactions!=null) {
-      for(var i = 0; i<transactions.length; i++) {
-        try {
-          if(transactions[i].id==lastChat) continue;
-          else lastChat = transactions[i].id;
-          if(transactions[i].address!=null && transactions[i].specification!=null 
-            && transactions[i].specification.memos!=null && transactions[i].specification.memos.length>0
-            && transactions[i].specification.memos[0].data!=null && transactions[i].specification.memos[0].data!="")
-            printChat("<b>"+transactions[i].outcome.timestamp+" - "+transactions[i].address+":</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+transactions[i].specification.memos[0].data);
-        }
-        catch(ex) {
-          console.log("Chat parsing error: "+ex);
+  if(showChat) { // download chat only if the box is showing and enabled
+    var chatAPI = new ripple.RippleAPI({server:chatServer});;
+    chatAPI.connect().then(function() {
+      return chatAPI.getTransactions(chatWallet, options );
+    }, function(err) { console.log("Error connecting to chat server: "+err); return null; })
+    .then(function (transactions) {
+      if(transactions!=null) {
+        for(var i = 0; i<transactions.length; i++) {
+          try {
+            if(transactions[i].id==lastChat) continue;
+            else lastChat = transactions[i].id;
+            if(transactions[i].address!=null && transactions[i].specification!=null 
+              && transactions[i].specification.memos!=null && transactions[i].specification.memos.length>0
+              && transactions[i].specification.memos[0].data!=null && transactions[i].specification.memos[0].data!="")
+              printChat("<b>"+transactions[i].outcome.timestamp+" - "+transactions[i].address+":</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+stripHTML($($.parseHTML(transactions[i].specification.memos[0].data)).text()));
+          }
+          catch(ex) {
+            console.log("Chat parsing error: "+ex);
+          }
         }
       }
-    }
-  }, function(err) {
-    if(err=="[MissingLedgerHistoryError(Server is missing ledger history in the specified range)]") {
-      if(lastChat!=null) {
-        printChat("No messages found.");
-        lastChat=null;
+    }, function(err) {
+      if(err=="[MissingLedgerHistoryError(Server is missing ledger history in the specified range)]") {
+        if(lastChat!=null) {
+          printChat("No messages found.");
+          lastChat=null;
+        }
       }
-    }
-    else console.log("Chat retrieval error: "+err);
-  }).then(function() {
+      else console.log("Chat retrieval error: "+err);
+    }).then(function() {
+      setTimeout(runChat, chatUpdateInterval*1000);
+    });
+  }
+  else {
     setTimeout(runChat, chatUpdateInterval*1000);
-  });
+  }
 }
 function printChat(msg) {
   $("#chatHistoryContents").append("<br />"+msg);
@@ -2841,7 +2860,7 @@ function sendChat() {
       payment.destination.amount.currency = baseCurrency;
       
       // Add the chat message
-      payment.memos = [{data:$("#chatMessage").val()}];
+      payment.memos = [{data:$($.parseHTML($("#chatMessage").val())).text()}];
       $("#chatMessage").val("");
       
       try {
@@ -2920,19 +2939,6 @@ $(document).ready(function() {
     // Clear the javascript warning message at start because we clearly have javascript enabled
     $("#errors").html("&nbsp;");
     
-    // Auto-display chatroom for desktop-users
-    if($("#controlMiscMenu").css("display")=="none" && $(window).height()>=600) {
-      showChat = true;
-      $("#chatbox").css("display", "block");
-    }
-    $("#chatbox").draggable().resizable({ handles: 'n, e, s, w' });
-    var chatbox = $("#chatbox").draggable();
-    $('#chatHistoryContents', chatbox).mousedown(function(ev) {
-      chatbox.draggable('disable');
-    }).mouseup(function(ev) {
-      chatbox.draggable('enable');
-    });
-    
     // Initial page fitting
     refreshLayout();
     
@@ -2993,6 +2999,19 @@ $(document).ready(function() {
     $("#account").val(Cookies.get('accountAddr'));
     address = $("#account").val();
     updateLoginMessage();
+    
+    // Auto-display chatroom for desktop-users
+    if($("#controlMiscMenu").css("display")=="none" && $(window).height()>=600) {
+      showChat = true;
+      $("#chatbox").css("display", "block");
+    }
+    $("#chatbox").draggable().resizable({ handles: 'n, e, s, w' });
+    var chatbox = $("#chatbox").draggable();
+    $('#chatHistoryContents', chatbox).mousedown(function(ev) {
+      chatbox.draggable('disable');
+    }).mouseup(function(ev) {
+      chatbox.draggable('enable');
+    });
     
     // Deprecated scrolling stock ticker thing at top
     /*$("#scrollingText").smoothDivScroll({
