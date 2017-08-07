@@ -19,8 +19,8 @@
     <script type="text/javascript" src="jquery-ui-1.8.23.custom.min.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.min.js"></script>
     <script type="text/javascript" src="particles.js"></script>
-    <script type="text/javascript" src="20170805.js"></script>
-    <link rel="stylesheet" href="20170805.css">
+    <script type="text/javascript" src="20170806.js"></script>
+    <link rel="stylesheet" href="20170806.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="smoothDivScroll.css">
     
@@ -54,8 +54,27 @@
     <table>
     <tr><td><div id='balanceLabel' style='visibility:hidden; display:none;'>Balance:</div></td><td><div id='balance' style='display:none;'></div></td></tr>
     <tr><td><div id='ordersLabel' style='visibility:hidden; display:none;'>Orders:</div></td><td><div id='orders' style='float:right;'></div></td></tr>
-    <tr><td colspan='2'><div id='history' style='clear:right;'></div></td></tr>
+    <tr><td colspan='2'>
+    <div id='controlMiscMenu'>
+      <a id='showMiscMenu' href='#' onclick='document.getElementById("miscMenu").style.display="block"; document.getElementById("showMiscMenu").style.display="none"; document.getElementById("hideMiscMenu").style.display="block";  refreshImmediately = true; refreshLayout(); return false;'> + + Show Menu + + </a>
+      <a id='hideMiscMenu' href='#' style='display:none;' onclick='document.getElementById("miscMenu").style.display="none"; document.getElementById("showMiscMenu").style.display="block"; document.getElementById("hideMiscMenu").style.display="none"; refreshImmediately = true; refreshLayout(); return false;'> - - Hide Menu - - </a>
+    </div>
+    <div id='miscMenu' style='clear:right;'>
+    
+    
+    </div>
+    </td></tr>
     </table>
+    </div>
+    
+    <div id='chatbox'>
+      <div id='chatHistory'>
+        <div id='chatHistoryContents'>
+        </div>
+      </div>
+      <div id='chatControls'>
+      <input id='chatMessage' name='chatMessage' type='text' value='' placeholder='Enter chat to send.' autocomplete="false" /> <input id='sendChat' name='sendChat' type='submit' />
+      </div>
     </div>
     
     <div id='loginBackground' style='display:none;'>
@@ -130,14 +149,18 @@
       </div>
     </div>
     
-    <div id='destinationTagWindow' class='popup' style='display:none;'>
-      <div id='destinationTagContents'>
-        <h3>Add a destination tag for the transaction...</h3>
+    <div id='sendOptionsWindow' class='popup' style='display:none;'>
+      <div id='sendOptionsContents'>
+        <h3>Set Optional Fields to Transaction...</h3>
         <div>
-        <input id='destinationTagInput' type='number' min='0' step='1' value='' placeholder='Enter an integer number note to attach...' onclick="this.select();" />
+        <table>
+        <tr><td style='text-align:left;'>Destination Tag:</td><td style='text-align:right;' class='right'><input id='destinationTagInput' type='number' min='0' step='1' value='' placeholder='Integer number note to include...' onclick="this.select();" /></td></tr>
+        <tr><td style='text-align:left;'>Memo:</td><td style='text-align:right;' class='right'><input id='memoInput' type='text' value='' placeholder='Text note to include...' onclick="this.select();" /></td></tr>
+        </table>
+        
         </div>
-        <div><input id='destinationTagSubmit' name='destinationTagSubmit' type='submit' value='Submit' /><input id='destinationTagCancel' name='destinationTagCancel' type='submit' value='Cancel' /></div>
-        <div id='destinationTagInfo' class='disclaimer'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The destination tag is an optional integer note that you can attach to your transaction, like a description of a wire or check.  Sometimes, others will ask you to send your transaction with things like an order id, account number, etc.  The main usage so far is if the recipient address is shared by multiple people; the destination tag then helps make note of who specifically this transaction is for.</div>
+        <div><input id='sendOptionsSubmit' name='sendOptionsSubmit' type='submit' value='Submit' /><input id='sendOptionsCancel' name='sendOptionsCancel' type='submit' value='Cancel' /></div>
+        <div id='sendOptionsInfo' class='disclaimer'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The destination tag and memo are optional notes you can attach to your transaction.  The destination tag is usually asked for to send your transaction with things like an order id, account number, etc.  The main usage is if the recipient shares their account with multiple people, such as a bank managing for many customers; the destination tag then helps make note of who specifically this transaction is for.  The memo is a note can be any sort of text.  Both are completely optional.</div>
       </div>
     </div>
     
@@ -198,7 +221,7 @@
                 <div id='issuer2Width' style='width:30%; text-align:right;'>
                 <div style='padding-right:5%;'>
                 <div id='backedby2'>Backed by <span id='issuer2'> </span></div>
-                <div id='destinationTagLabel' style='display:none;'><a href='#' onclick='showDestinationTag();'>Set Destination Tag<span id='currentDestinationTag'></span></a></div>
+                <div id='sendOptionsLabel' style='display:none;'>Dest. Tag: <span id='currentDestinationTag'>None</span> | <a href='#' onclick='showSendOptions();'>Set Optional Fields</a></div>
                 </div>
                 </div>
               </div>
@@ -213,7 +236,7 @@
       <div>© 2016 <a href='/'>The World Exchange</a> | <a target='_blank' href='mailto:contact@theworldexchange.net'>Contact@TheWorldExchange.Net</a> | Follow: <a target='_blank' href='https://twitter.com/WorldExchangeX'>@WorldExchangeX</a></div>
       <div>A Fully Client-Side Wallet and Decentralized Exchange Showcasing What's Possible with Blockchain</div>
       <div>Created by <a href="https://www.pftq.com/" target="_blank">pftq</a> of <a href='https://www.autodidactic.ai/' target='_blank'>Autodidactic I</a>
-       - Powered by <a target='_blank' href='https://en.wikipedia.org/wiki/Ripple_(payment_protocol)'>Ripple</a> - Open-Sourced on <a href='https://github.com/Autodidactic-I/TheWorldExchange' target='_blank'>Github</a> (v.2017/08/05)</div>
+       - Powered by <a target='_blank' href='https://en.wikipedia.org/wiki/Ripple_(payment_protocol)'>Ripple</a> - Open-Sourced on <a href='https://github.com/Autodidactic-I/TheWorldExchange' target='_blank'>Github</a> (v.2017/08/06)</div>
       </div>
       
       
@@ -250,8 +273,8 @@
           
           
           <h5 id='started'><a href='#started' style='text-decoration:none; border:0;'>How to Get Started</a></h5>
-          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbnbsp;The quickest way to get started is to create an account on the Login page or use an existing Ripple address if you have one.</p>
-          <p id='started_minXRP'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href='#started_minXRP' style='text-decoration:none; border:0;'>Min XRP and Transaction Cost</a></b>: After creating an account, the account requires a minimum amount of XRP to be activated.  XRP is the native currency on the Ripple network with no issuer or backer.  The starting minimum is 20 XRP, with each additional symbol you want to hold requiring an additional 5 XRP minimum.  So for example, if you want to trade both USD and EUR, you would need a minimum 40 XRP (20 base + 5 per symbol).  This is all done to prevent spam and other issues.  While the technology is free, a small amount of XRP is burned each time a transaction happens, so bad actors cannot flood the network with fake orders or issuances.  It is not an amount paid out to someone and is part of the Ripple protocol itself.</p>
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The quickest way to get started is to create an account on the Login page or use an existing Ripple address if you have one.</p>
+          <p id='started_minXRP'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href='#started_minXRP' style='text-decoration:none; border:0;'>Min XRP and Transaction Cost</a></b>: After creating an account, the account requires a minimum amount of XRP to be activated.  XRP is the native currency on the Ripple network with no issuer or backer.  The starting minimum is 20 XRP, with each additional symbol you want to hold requiring an additional 5 XRP minimum.  So for example, if you want to trade both USD and EUR, you would need a minimum 40 XRP (20 base + 5 per symbol).  This is all done to prevent spam and other issues.  While the technology is free, a small amount of XRP is burned each time a transaction happens, so bad actors cannot flood the network with fake orders or issuances.  It is not an amount paid out to someone and is part of the Ripple protocol itself (see <a href='https://ripple.com/build/rippleapi/#transaction-fees' target='_blank'>Ripple transaction fees).</a></p>
           <p id='started_issuers'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href='#started_issuers' style='text-decoration:none; border:0;'>Tokens and Issuers</a></b>: All tokens except XRP are issued by someone or some company.  Their value is dependent on people's trust that whoever created the token will redeem or do other things to maintain the value; for example, if some bank issues the token XYZ to represent actual USD, they should be willing to redeem you in real cash if you send the token back to them.  It's like credit cards from a bank or gift cards from a store, which otherwise have no value unless the issuing group maintains it.  In the mean time, you can then use the XYZ token with others that accept it as a substitute for what it represents (the cash).  The person that offers the promise to redeem is called the issuer or <a href='https://ripple.com/build/gateway-guide/' target='_blank'>Gateway</a> (in Ripple's official terms).  You can find existing known issuers for any token by typing the token symbol into The World Exchange and clicking on the <b>"Backed by ..."</b> link to browse the list (or input an issuer address manually).
           <p id='started_funding'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href='#started_funding' style='text-decoration:none; border:0;'>Funding an Account</a></b>: The easiest way to fund your account is to use a Ripple activation service like <a href="https://www.bithomp.com/activation/" target="_blank">Bithomp</a>, which allows you to buy XRP with traditional payment methods like PayPal to fund your newly created account.  Beyond that, you would go to the issuers themselves like <a href='https://www.bitstamp.net' target='_blank'>Bitstamp</a> or <a href='https://www.gatehub.net/' target='_blank'>Gatehub</a>, who as described above will exchange and redeem in real-world currencies any token they back on the Ripple network (including USD and EUR).  Specifically you would be looking for exchanges or firms that allow withdrawal or deposit via Ripple (which The World Exchange runs on); you'll know when you see a Ripple address for deposit or withdrawal of currencies and other tickers.  Lastly, you can go to cryptocurrency exchanges like <a href="https://www.poloniex.com/" target="_blank">Poloniex</a> or <a href='https://www.kraken.com/' target='_blank'>Kraken</a> to buy XRP before sending it to your new account, but note they can only send and receive XRP from the Ripple Network because they don't issue or back any tokens (they are just traditional exchanges).  Once you have something in your account, you can trade it for any other token on the Ripple network using a site like this one, but just be careful with sending back out.  Unless the receiving service or exchange is an issuer / Gateway also built on Ripple, it will only accept XRP.  Longer term, this should change as more institutions adopt the network.  There are actually already existing banks and major institutions backing USD and other real-world currencies on the Ripple network, but out of respect for <a href='https://www.ripple.com/' target='_blank'>Ripple Labs</a>, the creator of Ripple, we will not name them unless they do so first publicly.</p>
           <p id='started_receivableTokensList'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href='#started_receivableTokensList' style='text-decoration:none; border:0;'>Receivable Tokens List</a></b>: You must explicitly allow each token and issuer you want to receive before anyone can send you anything.  If you are expecting to receive anything, make sure the token and who backs it are in your "Receivable Tokens" settings.  Similarly before sending anything to a recipient, make sure the recipient has set their "Receivable Tokens" to be able to accept the token you are about to send.  All of this is done so that you do not accidentally receive tokens backed by people/companies you do not trust or know - for example, a fake USD token issued by a scammer.  In the general case, you do not need to do this for tokens you buy, sell, or issue, only for what others send you.  The exception is with issuers who require token holders be authorized or approved; in this case, both the buyer and issuer must add each other to each their respective "Receivable Tokens" and "Authorized Token Holders" lists to do anything with the token.  The one token that does not require any of this is Ripple's native currency XRP, which no one can issue and therefore can't be faked.  Note that Ripple's <a href='https://ripple.com/build/gateway-guide/#trust-lines-and-issuances' target='_blank'>Gateway documentation</a> refers to these lists as trustlines.</p>
@@ -289,10 +312,10 @@
           particlesJS.load('particles-js', 'particles.json', function() {
             console.log('callback - particles.js config loaded');
           });
-          $("#particles-js").css("height", ($(window).height()-70-5)+"px");
-          $("#loginBackground").css("height", ($(window).height())+"px");
-        
+        $("#particles-js").css("height", ($(window).height()-70-5)+"px");
+        $("#loginBackground").css("height", ($(window).height())+"px");
       </script>
+    
 
 
 </body>
