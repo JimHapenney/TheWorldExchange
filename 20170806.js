@@ -28,14 +28,14 @@ var reconnectInterval = 600; // number of intervals before reconnecting to reset
 var maxLedgerOffset = 100; // High number of maxLedger errors during heavy trading periods if we leave it at default
 var maxFee = "2000"; // Would rather overpay than not see my order go through during heavy trading
 
-// Default Issuers to use; need to figure out how to match xrpcharts
+// Default Issuers to use; need to figure out how to match defaults on xrpcharts
 var majorIssuers = {
     "BTC": ["rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"],
     "EUR": ["rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"],
     "USD": ["rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B", "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"]
 };
 
-// Known issuers; need to figure out how to look up dynamically
+// Known issuers; doesn't matter what you put here, updates dynamically via Ripple Data API
 var issuers = {
     "BTC": ["rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"],
     "CNY": ["rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y"],
@@ -50,7 +50,7 @@ var issuers = {
     "XRP": []
 };
 
-// Known issuer names; need to figure out how to look up
+// Known issuer names; doesn't matter what you put here, updates dynamically via Ripple Data API
 var issuerNames = {
     "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B":"Bitstamp",
     "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq":"Gatehub",
