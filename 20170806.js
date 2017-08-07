@@ -97,6 +97,7 @@ var showOrderbook = false;
 var errored = false;
 var loggingIn = false;
 var refreshImmediately = false;
+var chatLoaded = false;
 
 var trustlines = {
   
@@ -1435,15 +1436,15 @@ function refreshLayout() {
   if(Math.abs(temp-parseInt($('#container').css('height')))>10)
     $('#container').css('height', temp+'px');
   
-  temp = Math.floor(Math.max(50, ($('#container').height()*.42- $("#topHalf").height() - $("#trade").height())));
+  temp = Math.floor(Math.max(50, ($('#containerpadding').height()*.42- $("#topHalf").height() - $("#trade").height())));
   if(Math.abs(temp-parseInt($('#trade').css('margin-top')))>5)
     $('#trade').css('margin-top', temp+'px');
   
   if(action!="send" && $("#issuer2Width").length && Math.abs($("#counterparty").width()-$("#issuer2Width").width())>5) $("#issuer2Width").css("width", Math.floor($("#counterparty").width())+"px");
   else if(action=="send" && $("#issuer2Width").length && Math.abs(1.15*$("#recipient").width()-$("#issuer2Width").width())>5) $("#issuer2Width").css("width", Math.floor(1.15*$("#recipient").width())+"px");
   
-  temp = Math.floor(Math.max(10, (($('#container').height()-$('#content').height()-$('#footer').height()-20))));
-  if(Math.abs(temp-parseInt($('#trade').css('margin-top')))>5)
+  temp = Math.floor(Math.max(10, (($('#containerpadding').height()-$('#content').height()-$('#footer').height()-20))));
+  if(Math.abs(temp-parseInt($('#footer').css('margin-top')))>5)
     $('#footer').css('margin-top', temp+'px');
     
   $("#particles-js").css("height", ($(window).height()-70-5)+"px");
@@ -2818,6 +2819,7 @@ function runChat() {
             console.log("Chat parsing error: "+ex);
           }
         }
+        if(!chatLoaded) chatLoaded = true;
       }
     }, function(err) {
       if(err=="[MissingLedgerHistoryError(Server is missing ledger history in the specified range)]") {
@@ -2837,7 +2839,7 @@ function runChat() {
 }
 function printChat(msg) {
   $("#chatHistoryContents").append("<br />"+msg);
-  if(numIntervals>1) $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+  if(chatLoaded) $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
 }
 
 // Send chat message by submitting an empty order to chatWallet but with memo attached
