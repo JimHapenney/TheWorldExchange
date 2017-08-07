@@ -1388,6 +1388,9 @@ function refreshLayout() {
   temp = Math.floor(Math.max(10, (($('#container').height()-$('#content').height()-$('#footer').height()-20))));
   if(Math.abs(temp-parseInt($('#trade').css('margin-top')))>5)
     $('#footer').css('margin-top', temp+'px');
+    
+  $("#particles-js").css("height", ($(window).height()-70-5)+"px");
+  $("#loginBackground").css("height", ($(window).height())+"px");
 }
 
 // Show the login window
@@ -2763,6 +2766,7 @@ $(document).ready(function() {
     document.getElementById('issuerList').onchange = function() { $("#issuerInput").val($("#issuerList").val()); };
     
     // Other form controls
+    hideIssuer();
     $("#cancelBacker").on("click", function() { hideIssuer(); });
     $("#backerSubmit1").on("click", function() { saveIssuer1(); updateURL(); });
     $("#backerSubmit2").on("click", function() { saveIssuer2(); updateURL(); });
