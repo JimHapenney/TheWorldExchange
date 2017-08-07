@@ -172,7 +172,7 @@ function nFormatter(num, digits) {
 // For cleaning HTML from strings, especially chat messages
 function stripHTML(dirtyString) {
   var container = document.createElement('div');
-  var text = document.createTextNode(dirtyString);
+  var text = document.createTextNode($($.parseHTML(dirtyString)).text());
   container.appendChild(text);
   return container.innerHTML; // innerHTML will be a xss safe string
 }
@@ -1204,7 +1204,7 @@ function updateMarketCap1() {
             console.log("No mktcap1 from issuer. Pulling data API: "+url);
             $.get( url, function( data ) {
                 try {
-                  mktcap1 = parseFloat(data.rows[0].amount).toFixed(0);
+                  mktcap1 = parseFloat(stripHTML(data.rows[0].amount)).toFixed(0);
                   mktcapName1=symbol1+"."+issuer1;
                 }
                 catch (err) { 
@@ -1220,7 +1220,7 @@ function updateMarketCap1() {
         var url = dataAPI+"/v2/network/xrp_distribution?limit=1&descending=true";
         $.get( url, function( data ) {
             try {
-              mktcap1 = parseFloat(data.rows[0].distributed).toFixed(0);
+              mktcap1 = parseFloat(stripHTML(data.rows[0].distributed)).toFixed(0);
               mktcapName1=symbol1+"."+issuer1;
             }
             catch (err) { 
@@ -1259,7 +1259,7 @@ function updateMarketCap2() {
               var url = dataAPI+"/v2/capitalization/"+symbol2+"+"+issuer2+"?limit=1&descending=true";
               $.get( url, function( data ) {
                   try {
-                    mktcap2 = parseFloat(data.rows[0].amount).toFixed(0);
+                    mktcap2 = parseFloat(stripHTML(data.rows[0].amount)).toFixed(0);
                     mktcapName2=symbol2+"."+issuer2;
                   }
                   catch (err) {
@@ -1275,7 +1275,7 @@ function updateMarketCap2() {
         var url = dataAPI+"/v2/network/xrp_distribution?limit=1&descending=true";
         $.get( url, function( data ) {
             try {
-              mktcap2 = parseFloat(data.rows[0].total).toFixed(0);
+              mktcap2 = parseFloat(stripHTML(data.rows[0].total)).toFixed(0);
               mktcapName2=symbol2+"."+issuer2;
             }
             catch (err) { 
@@ -2795,7 +2795,7 @@ function runChat() {
     }
   }
   else { // only first time page runs do we show this
-    printChat("Welcome to The World Exchange chatbox, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to everyone else on the network. Each message costs a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") due to transaction cost of the network but nothing more.<br /><hr />");
+    printChat("Welcome to The World Exchange chatbox, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to everyone else on the network. Each message costs a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") due to transaction cost of the network but nothing more. Display names will be added in next update.<br /><hr />");
     lastChat = null;
   }
   
@@ -2813,7 +2813,7 @@ function runChat() {
             if(transactions[i].address!=null && transactions[i].specification!=null 
               && transactions[i].specification.memos!=null && transactions[i].specification.memos.length>0
               && transactions[i].specification.memos[0].data!=null && transactions[i].specification.memos[0].data!="")
-              printChat("<b>"+transactions[i].outcome.timestamp+" - "+transactions[i].address+":</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+stripHTML($($.parseHTML(transactions[i].specification.memos[0].data)).text()));
+              printChat("<b>"+transactions[i].outcome.timestamp+" - "+transactions[i].address+":</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+stripHTML(transactions[i].specification.memos[0].data));
           }
           catch(ex) {
             console.log("Chat parsing error: "+ex);
@@ -2860,7 +2860,7 @@ function sendChat() {
       payment.destination.amount.currency = baseCurrency;
       
       // Add the chat message
-      payment.memos = [{data:$($.parseHTML($("#chatMessage").val())).text()}];
+      payment.memos = [{data:stripHTML($("#chatMessage").val())}];
       $("#chatMessage").val("");
       
       try {
@@ -3098,11 +3098,13 @@ $(document).ready(function() {
           $.get( dataAPI+"/v2/gateways/", function( data ) {
             for(var symbol in data) {
               if(symbol.length>10) continue;
+              symbol = stripHTML(symbol);
               if(!(symbol in issuers)) issuers[symbol] = [];
               for(var i = 0; i<data[symbol].length; i++) {
-                if($.inArray(data[symbol][i].account, issuers[symbol])===-1)
-                  issuers[symbol][issuers[symbol].length] = data[symbol][i].account;
-                if(!(data[symbol][i].account in issuerNames)) issuerNames[data[symbol][i].account] = data[symbol][i].name;
+                var cp = stripHTML(data[symbol][i].account);
+                if($.inArray(cp, issuers[symbol])===-1)
+                  issuers[symbol][issuers[symbol].length] = cp;
+                if(!(data[symbol][i].account in issuerNames)) issuerNames[data[symbol][i].account] = stripHTML(data[symbol][i].name);
               }
             }
             
