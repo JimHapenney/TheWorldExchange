@@ -77,14 +77,14 @@ select, input{
 }
 
 #trade input.symbol{
-  width:7%;
+  width:5%;
 }
 
 #trade input.qty{
   width:8%;
 }
 #trade input.recipient {
-  width:16.5%;
+  width:14.5%;
 }
 input.linkShare {
   width:30%;
