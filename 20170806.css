@@ -401,6 +401,7 @@ a:hover{
   font-size:10pt;
   min-width:250px;
   min-height:340px;
+  z-index:99999;
 }
 #chatHistory {
   height:84%;
