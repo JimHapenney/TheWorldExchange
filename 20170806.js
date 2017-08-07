@@ -44,7 +44,7 @@ var issuers = {
     "GBP": ["rBycsjqxD8RVZP5zrrndiVtJwht7Z457A8"],
     "JPY": ["r9ZFPSb1TFdnJwbTMYHvVwFK1bQPUCVNfJ"],
     "KRW": ["rPxU6acYni7FcXzPCMeaPSwKcuS2GTtNVN"],
-    "USD": ["rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B", "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq", "rMwjYedjc7qqtKYVLiAccJSmCwih4LnE2q"],
+    "USD": ["rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B", "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"],
     "XAG": ["r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH"],
     "XAU": ["r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH"],
     "XRP": []
@@ -60,8 +60,7 @@ var issuerNames = {
     "r9ZFPSb1TFdnJwbTMYHvVwFK1bQPUCVNfJ":"Ripple Exch Tokyo",
     "rPxU6acYni7FcXzPCMeaPSwKcuS2GTtNVN":"EXRP",
     "r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH":"Ripple Singapore",
-    "rDVdJ62foD1sn7ZpxtXyptdkBSyhsQGviT":"Ripple Dividend",
-    "rMwjYedjc7qqtKYVLiAccJSmCwih4LnE2q":"Snapswap"
+    "rDVdJ62foD1sn7ZpxtXyptdkBSyhsQGviT":"Ripple Dividend"
 };
 
 // Current state variables
@@ -2795,7 +2794,7 @@ function runChat() {
     }
   }
   else { // only first time page runs do we show this
-    printChat("Welcome to The World Exchange chatbox, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to everyone else on the network. Each message costs a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") due to transaction cost of the network but nothing more. Display names will be added in next update.<br /><hr />");
+    printChat("Each message costs a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") due to transaction cost of the network but nothing more. Display names will be added in next update.<br /><hr />");
     lastChat = null;
   }
   
