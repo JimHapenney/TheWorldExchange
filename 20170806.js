@@ -3005,7 +3005,7 @@ $(document).ready(function() {
       showChat = true;
       $("#chatbox").css("display", "block");
     }
-    $("#chatbox").draggable().resizable({ handles: 'n, e, s, w' });
+    $("#chatbox").draggable().resizable({ handles: 'all' });
     var chatbox = $("#chatbox").draggable();
     $('#chatHistoryContents', chatbox).mousedown(function(ev) {
       chatbox.draggable('disable');
