@@ -3267,11 +3267,11 @@ $(document).ready(function() {
           
             if (e.originalEvent.wheelDelta < 0 || e.originalEvent.detail > 0) {
               if(!disableScrollToAbout && $("#loginBackground").css("display") == "none" && $("#about").css("display")=="none" && $(window).scrollTop() + $(window).height() >= $(document).height()) {
-                //scrolling = true;
+                scrolling = true;
                 $("#about").css("display", "block");
-                //jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500);
+                jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500);
                 setURL("#about");
-                //setTimeout(function() { scrolling = false; }, 500);
+                setTimeout(function() { scrolling = false; }, 1000);
               }
             }
             
