@@ -2994,7 +2994,7 @@ function resetChatSize() {
   else {
     $("#chatbox").css("width", ($("#container").width()-chatDefaultMarginRight-$("#submit").width()-$("#submit").offset().left)*.7);
     $("#chatbox").css("height", (windowHeight()-chatDefaultMarginBottom-$("#submit").height()-$("#submit").offset().top)*.8);
-    $("#chatbox").css("left", $("#container").width() - chatDefaultMarginRight -$("#chatbox").width() );
+    $("#chatbox").css("left", $("#container").width() - chatDefaultMarginRight -$("#chatbox").width()-5 );
     $("#chatbox").css("top", windowHeight() - chatDefaultMarginBottom -$("#chatbox").height() );
   }
 }
@@ -3267,11 +3267,11 @@ $(document).ready(function() {
           
             if (e.originalEvent.wheelDelta < 0 || e.originalEvent.detail > 0) {
               if(!disableScrollToAbout && $("#loginBackground").css("display") == "none" && $("#about").css("display")=="none" && $(window).scrollTop() + $(window).height() >= $(document).height()) {
-                scrolling = true;
+                //scrolling = true;
                 $("#about").css("display", "block");
-                jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500);
+                //jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500);
                 setURL("#about");
-                setTimeout(function() { scrolling = false; }, 500);
+                //setTimeout(function() { scrolling = false; }, 500);
               }
             }
             
