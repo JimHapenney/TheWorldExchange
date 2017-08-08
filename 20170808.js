@@ -535,7 +535,7 @@ function loadAccount(loadOrderbookNext=false) {
     if($.trim($("#miscMenu").html())=="") changeMiscMenu = true;
     if(address!="") {
       if(changeMiscMenu) {
-        $("#miscMenu").html("<div><a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>Min "+baseCurrency+": "+nFormatter(minBaseCurrency, accuracy)+"</a> | <a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>Current Fee: "+nFormatter(fee, accuracy)+"</a><br /><a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set "+(settings["requireAuthorization"]? "Authorized Token Holders":"Receivable Tokens")+"</a></div><div><a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>How to Fund / Deposit</a></div><div><a href='#' onclick='showSettings();'>Advanced Settings</a></div>"+commonMenu);
+        $("#miscMenu").html("<div><a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>Min "+baseCurrency+": "+nFormatter(minBaseCurrency, accuracy)+"</a> | <a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>Current Fee: "+fee.toFixed(6)+"</a><br /><a href='https://bithomp.com/explorer/"+address+"' target='_blank'>View Account History</a></div><div><a href='#' onclick='showTrustlines();'>Set "+(settings["requireAuthorization"]? "Authorized Token Holders":"Receivable Tokens")+"</a></div><div><a href='#started' onclick='$(\"#about\").css(\"display\", \"block\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#started\").offset().top}, 1000); setURL(\"#started\"); return false;'>How to Fund / Deposit</a></div><div><a href='#' onclick='showSettings();'>Advanced Settings</a></div>"+commonMenu);
         $("#showMiscMenu").css("display", "block");
         $("#hideMiscMenu").css("display", "none");
         checkMinBaseCurrency(); // Update balance info to message to fund account
@@ -2923,12 +2923,12 @@ function runChat() {
 }
 function printChat(msg) {
   $("#chatHistoryContents").append("<br />"+msg);
-  if(chatLoaded) $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+  if(chatLoaded && $('#chatHistory').scrollTop()>0) $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
 }
 
 // Send chat message by submitting an empty order to chatWallet but with memo attached
 function sendChat() {
-  if(address=="" || key=="") printChat("<b>You must login with your secret key first! Chat messages cost a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") to create the transactions on the network.</b>");
+  if(address=="" || key=="") printChat("--- You must login with your secret key first! Chat messages cost a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+") to create the transactions on the network. ---");
   else if($("#chatMessage").val()=="") { }
   else {
       var payment = {};
@@ -2970,8 +2970,7 @@ function sendChat() {
             }
             catch(er) {
               errored = true;
-              printChat("Error signing chat message to send: "+er);
-              refreshLayout();
+              printChat("--- Error signing chat message to send: "+er+" ---");
             }
             
             if(transaction!="") {
@@ -2981,31 +2980,27 @@ function sendChat() {
                 // Friendlier messages
                 if(result.resultCode=="tesSUCCESS")
                   {}
-                else if(result.resultCode=="terQUEUED") printChat("Chat message queued due to high load on network. Wait a few min and try again if no result.");
-                else if(result.resultCode=="tecINSUF_RESERVE_OFFER") printChat("Chat not sent due to insufficient "+baseCurrency+". Every message costs at least a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+").");
-                else printChat("Notice on recent chat submission ("+result.resultCode+"): "+result.resultMessage+".");
+                else if(result.resultCode=="terQUEUED") printChat("--- Chat message queued due to high load on network. Wait a few min and try again if no result. ---");
+                else if(result.resultCode=="tecINSUF_RESERVE_OFFER") printChat("--- Chat not sent due to insufficient "+baseCurrency+". Every message costs at least a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+"). ---");
+                else printChat("--- Notice on recent chat submission ("+result.resultCode+"): "+result.resultMessage+". ---");
                 
                 noDisconnecting = false;
-                refreshLayout();
               }, function (err) {
                 errored = true;
-                printChat("Error sending chat message: "+err);
+                printChat("--- Error sending chat message: "+err+" ---");
                 noDisconnecting = false;
-                refreshLayout();
               });
             }
             else noDisconnecting = false;
         }, function (er) {
             errored = true;
-            printChat("Error preparing to send chat: "+err);
+            printChat("--- Error preparing to send chat: "+err+" ---");
             noDisconnecting = false;
-            refreshLayout();
         });
       }
       catch(ex) {
         errored = true;
-        $("#errors").html("Error sending chat: "+ex);
-        refreshLayout();
+        printChat("--- Error sending chat: "+ex+" ---");
       }
     }
 }
