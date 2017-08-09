@@ -2303,7 +2303,7 @@ function showSendOptions() {
   $("#sendOptionsWindow").focus();
   
   // Fix layout
-  $("#sendOptionsInfo").css("height", $("#sendOptions").outerHeight()+$("#sendOptions").offset().top-$("#sendOptionsInfo").offset().top-($("#sendOptionsContents").offset().top-$("#sendOptionsWindow").offset().top));
+  $("#sendOptionsInfo").css("height", $("#sendOptionsWindow").outerHeight()+$("#sendOptionsWindow").offset().top-$("#sendOptionsInfo").offset().top-($("#sendOptionsContents").offset().top-$("#sendOptionsWindow").offset().top));
 }
 
 function hideSendOptions() {
@@ -3329,7 +3329,7 @@ $(document).ready(function() {
               if(!disableScrollToAbout && $("#loginBackground").css("display") == "none" && $("#about").css("display")=="none" && $(window).scrollTop() + $(window).height() >= $(document).height()) {
                 scrolling = true;
                 $("#about").css("display", "block");
-                jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500);
+                //jQuery("html,body").animate({scrollTop: jQuery("#about").offset().top}, 500);
                 setURL("#about");
                 setTimeout(function() { scrolling = false; }, 1000);
               }
