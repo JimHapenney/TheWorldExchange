@@ -3064,9 +3064,9 @@ function resetChatSize() {
   }
 }
 function refreshChatLayout() {
+  $("#chatMessage").css("width", $("#chatHistory").width()-$("#sendChat").width()-10);
   $("#chatHistory").css("height", $("#chatbox").height()-$("#chatControls").height()-($("#chatHistory").offset().top-$("#chatbox").offset().top)-($("#chatControls").offset().top-($("#chatHistory").offset().top+$("#chatHistory").height())));
   $("#chatHistoryContents").css("height", $("#chatHistory").outerHeight()-$("#chatHistoryContents").position().top);
-  $("#chatMessage").css("width", $("#chatHistory").width()-$("#sendChat").width()-10);
   if($('#chatHistoryContents').scrollTop()+$('#chatHistoryContents').innerHeight()>=$('#chatHistoryContents')[0].scrollHeight) $('#chatHistoryContents').scrollTop($('#chatHistoryContents')[0].scrollHeight);
 }
 
