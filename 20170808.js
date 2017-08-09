@@ -2303,7 +2303,7 @@ function showSendOptions() {
   $("#sendOptionsWindow").focus();
   
   // Fix layout
-  $("#sendOptionsInfo").css("height", $("#sendOptions").outerHeight()+$("#sendOptions").offset().top-$("#sendOptionsInfo").offset().top-($("#sendOptionsContents").offset().top-$("#sendOptions").offset().top));
+  $("#sendOptionsInfo").css("height", $("#sendOptions").outerHeight()+$("#sendOptions").offset().top-$("#sendOptionsInfo").offset().top-($("#sendOptionsContents").offset().top-$("#sendOptionsWindow").offset().top));
 }
 
 function hideSendOptions() {
@@ -2568,7 +2568,7 @@ function submitTransaction() {
                     else noDisconnecting = false;
                 }, function (er) {
                     errored = true;
-                    $("#errors").html("Error preparing to send: "+err);
+                    $("#errors").html("Error preparing to send: "+er);
                     noDisconnecting = false;
                     refreshLayout();
                 });
@@ -2868,7 +2868,7 @@ function runChat() {
   if(showChat) { // download chat only if the box is showing and enabled
   
     var firstRun = false;
-    var options = {earliestFirst:true, initiated:false, limit:10, types:["payment"]};
+    var options = {earliestFirst:true, initiated:false, limit:100, types:["payment"]};
     if(lastChat!="") {
       if(lastChat!=null) {
         options.start=lastChat;
@@ -2946,8 +2946,6 @@ function sendChat() {
       
       // Add the chat message
       payment.memos = [{data:stripHTML($("#chatMessage").val())}];
-      $("#chatMessage").val("");
-      currentChatUpdateInterval = 1; // temporarily speed up updates so you see your comment as soon as it's up
       
       try {
         console.log(payment);
@@ -2974,12 +2972,17 @@ function sendChat() {
             }
             
             if(transaction!="") {
+              $("#chatMessage").prop("placeholder", "Sending... (takes up to 4 sec)");
+              setTimeout(function() { $("#chatMessage").prop("placeholder", "Enter chat to send."); }, 3000);
+              $("#chatMessage").val("");
+              currentChatUpdateInterval = 1; // temporarily speed up updates so you see your comment as soon as it's up
+              
               api.submit(transaction).then(function(result) {
                 errored = true;
                 
                 // Friendlier messages
                 if(result.resultCode=="tesSUCCESS")
-                  {}
+                  { } // Ripple takes 4 sec to confirm
                 else if(result.resultCode=="terQUEUED") printChat("--- Chat message queued due to high load on network. Wait a few min and try again if no result. ---");
                 else if(result.resultCode=="tecINSUF_RESERVE_OFFER") printChat("--- Chat not sent due to insufficient "+baseCurrency+". Every message costs at least a fraction of "+baseCurrency+" ("+nFormatter(fee+0.000001, accuracy)+"). ---");
                 else printChat("--- Notice on recent chat submission ("+result.resultCode+"): "+result.resultMessage+". ---");
@@ -3061,6 +3064,7 @@ function resetChatSize() {
 function refreshChatLayout() {
   $("#chatHistory").css("height", $("#chatbox").height()-$("#chatControls").height()-($("#chatHistory").offset().top-$("#chatbox").offset().top)-($("#chatControls").offset().top-($("#chatHistory").offset().top+$("#chatHistory").height())));
   $("#chatMessage").css("width", $("#chatHistory").width()-$("#sendChat").width()-10);
+  if(chatLoaded && $('#chatHistory').scrollTop()>0) $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
 }
 
 // condition for mobile view
