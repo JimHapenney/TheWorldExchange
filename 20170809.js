@@ -6,7 +6,6 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-var api; 
 // Servers added to the list are selected from at random to distribute load across the network
 var servers = [
   'wss://s1.ripple.com/',
@@ -67,6 +66,8 @@ var issuerNames = {
 };
 
 // Current state variables
+var api; 
+var chatAPI;
 var address = '';
 var key = '';
 var baseReserve = 20;
@@ -2880,12 +2881,42 @@ function runChat() {
       firstRun = true;
       options.earliestFirst = false;
     }
-  
-    var chatAPI = new ripple.RippleAPI({server:chatServer});;
     if(firstRun) $("#chatHistoryContents").append("Retrieving chat messages...");
-    chatAPI.connect().then(function() {
-      return chatAPI.getTransactions(chatWallet, options );
-    }, function(err) { console.log("Error connecting to chat server: "+err); return null; })
+    
+    new Promise(function(resolve, reject) { 
+      try {
+        if(chatAPI.isConnected()) {
+          resolve();
+        }
+        else {
+          console.log('Disconnected in runChat.');
+          try {
+            chatAPI.connect().then(function() {
+                console.log("Reconnected in runChat.");
+                resolve();
+            }, function (err) {
+              console.log("Failed to reconnect in runChat: "+err);
+              resolve();
+            });
+          }
+          catch (er) {
+            console.log("Failed to reconnect in runChat: "+er);
+            resolve();
+          }
+        }
+      }
+      catch (erx) {
+        console.log("Error in runChat API connect: "+erx);
+        resolve();
+      }
+    }, function(er) { console.log("Error in runChat reconnection: "+er); return null; }).then(function() {
+      
+      // Retrieve transactions of the chat wallet as chat history
+      if(chatAPI.isConnected())
+        return chatAPI.getTransactions(chatWallet, options );
+      else return null;
+      
+    }, function(err) { console.log("Error retrieving transactions from chat server: "+err); return null; })
     .then(function (transactions) {
       if(transactions!=null) {
         for(var i = 0; i<transactions.length; i++) {
@@ -3295,6 +3326,7 @@ $(document).ready(function() {
             $("#symbol2").autocomplete({ source:symbolsList, minLength:0, select: function(event, ui) { document.getElementById('symbol2').value = ui.item.value; errored = false; $("#errors").html("&nbsp;"); issuer2 = ""; updateSymbol2(); updateURL(); }}).focus(function() {$(this).autocomplete('search', $(this).val())});
             
             // Kick off chatbox listener
+            chatAPI = new ripple.RippleAPI({server:chatServer});
             runChat();
             
           }, "json" );
