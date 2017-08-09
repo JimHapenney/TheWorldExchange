@@ -19,8 +19,8 @@
     <script type="text/javascript" src="jquery-ui-1.8.23.custom.min.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.min.js"></script>
     <script type="text/javascript" src="particles.js"></script>
-    <script type="text/javascript" src="20170808.js"></script>
-    <link rel="stylesheet" href="20170808.css">
+    <script type="text/javascript" src="20170809.js"></script>
+    <link rel="stylesheet" href="20170809.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="smoothDivScroll.css">
     
@@ -70,8 +70,11 @@
     
     <div id='chatbox'>
       <div id='chatHistory'>
+        <div id='chatHistoryAnnouncement'>
+        Welcome to The World Exchange chat box, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to anyone any time. Each message costs a fraction of XRP (<span id='feeAnnouncement'>0.000012</span>) due to minimum transaction cost + size but nothing more. Display names will be added in next update.<br /><hr />
+        </div>
         <div id='chatHistoryContents'>
-        Welcome to The World Exchange chat box, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to anyone any time.
+        
         </div>
       </div>
       <div id='chatControls'>
@@ -199,9 +202,9 @@
             <option value='buy' >Buy</option>
             <option value='sell' >Sell</option>
             <option value='issue' >Issue</option>
-            <option value='send' selected='selected'>Send</option>
+            <option value='send' >Send</option>
           </select>
-          <input type='number' min='0' step="0.00000001" class='qty' id='qty1' name='qty1' value='82583.16337' placeholder='Qty' />
+          <input type='number' min='0' step="0.00000001" class='qty' id='qty1' name='qty1' value='' placeholder='Qty' />
           <input type='text' class='symbol' id='symbol1' name='symbol1' value='XRP' placeholder='Symbol' onclick="this.select();" />
           
           <span id='counterparty'>
@@ -212,7 +215,7 @@
           </span>
           <span id='recipientField' style='display:none;'>
             to
-            <input type='text' class='recipient' id='recipient' name='recipient' value='rwjcGGijAWQLFyDLXrYRKycUUxxSiEAyw8' placeholder='Recipient Address' onclick="this.select();" />
+            <input type='text' class='recipient' id='recipient' name='recipient' value='' placeholder='Recipient Address' onclick="this.select();" />
           </span>
           <input type='submit' id='submit' name='submit' value='Submit' />
           </div>
@@ -266,9 +269,9 @@
           <li>Represent yourself for a loan - aka peer-to-peer lending or crowdsourced credit score.</li>
           <li>Show proof of transactions, receipts - aka automated audit trail, peer-to-peer notary.</li>
           <li>Offer rewards, gift cards, game currencies - anything redeemable in real world.</li>
-          <li>Store information and data forever - archives, wikis, even the chat on this very site.</li>
+          <li>Store information permanently and forever - archives, wikis, even the chat on this very site.</li>
           </ul>
-          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;And pretty much anything else you can creatively think of.  There is no coding required and no dealing with complicated smart contracts.  Everything is just point and click.  The token is then be openly tradable with its price determined entirely by the free market, just like with any stock, bond, rating, currency, etc.  In addition, thanks to the automatic conversion behind the scenes, you only need to offer the symbol once for it to automatically be available across every symbol there is, instantly accepting any form of exchange without additional effort.</p>
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;And pretty much anything else you can creatively think of.  There is no coding required and no dealing with complicated smart contracts.  Everything is just point and click, and you don't have to host a single server or database.  The token is then be openly tradable with its price determined entirely by the free market, just like with any stock, bond, rating, currency, etc.  In addition, thanks to the automatic conversion behind the scenes, you only need to offer the symbol once for it to automatically be available across every symbol there is, instantly accepting any form of exchange without additional effort.</p>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At some point, you would either buy back the token you issued or offer some other form of exchange/reward/redemption to give it value.  The trust that you do that is why people would buy or accept your token in the real world.  It is your job to enforce and communicate that promise.  It is no different than a credit card issued by a bank, a gift card issued by a store, someone buying a stock on the trust that the company makes money for its shareholders, or a loan being offered on the trust that the borrower pays it back with interest.  Those that break that trust would find it difficult to do business in the future, just like with anything else in the real world.  The most important part is that every transaction on the exchange is permanent and there for all to see, so no one can ever lie and get away with it.</p>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The site here only takes care of the technology to implement this.  The legal and business structure would still have to be set up on your end.  Luckily, there are more and more firms emerging in this space which you can outsource to to take care of this.  Some groups that focus on ITOs and ICOs (Initial Token/Coin Offering) include <a href="https://bravenewcoin.com/" target="_blank">Brave New Coin</a>, <a href="http://www.debevoise.com/" target="_blank">Debevoise</a>, and <a href="https://argongroup.com/" target="_blank">Argon Group</a>.  More advanced users may also want to implement authorization of token holders and other features, which are available under the "Advanced Settings" (see <a href='#started_advancedSettings' onclick='setURL("#started_advancedSettings"); jQuery("html,body").animate({scrollTop: jQuery("#started_advancedSettings").offset().top}, 1000); return false;'>below</a>).  A demo of a token that is only tradable amongst approved users is available <a href='https://www.theworldexchange.net/?symbol1=TTT.rBcA1MkS2jtywAAi9bWfGsUk9R6RWQAyKr&symbol2=XRP' target='_blank'>here</a>, which you'll notice can be viewed publicly but not purchased or sold unless your account has been authorized by the issuer (in other words, a whitelist useful for compliance and KYC).</p>
           
