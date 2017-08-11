@@ -19,8 +19,8 @@
     <script type="text/javascript" src="jquery-ui-1.8.23.custom.min.js"></script>
     <script type="text/javascript" src="jquery-ui-1.10.3.custom.min.js"></script>
     <script type="text/javascript" src="particles.js"></script>
-    <script type="text/javascript" src="20170809.js"></script>
-    <link rel="stylesheet" href="20170809.css">
+    <script type="text/javascript" src="20170810x.js"></script>
+    <link rel="stylesheet" href="20170810x.css">
     <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="smoothDivScroll.css">
     
@@ -56,8 +56,8 @@
     <tr><td><div id='ordersLabel' style='visibility:hidden; display:none;'>Orders:</div></td><td><div id='orders' style='float:right;'></div></td></tr>
     <tr><td colspan='2'>
     <div id='controlMiscMenu'>
-      <a id='showMiscMenu' href='#' onclick='document.getElementById("miscMenu").style.display="block"; document.getElementById("showMiscMenu").style.display="none"; document.getElementById("hideMiscMenu").style.display="block";  refreshImmediately = true; rescaleWindow(); return false;'> + + Show Menu + + </a>
-      <a id='hideMiscMenu' href='#' style='display:none;' onclick='document.getElementById("miscMenu").style.display="none"; document.getElementById("showMiscMenu").style.display="block"; document.getElementById("hideMiscMenu").style.display="none"; refreshImmediately = true; rescaleWindow(); return false;'> - - Hide Menu - - </a>
+      <a id='showMiscMenu' href='#' onclick='showMiscMenu();'> + + + Show Menu + + + </a>
+      <a id='hideMiscMenu' href='#' style='display:none;' onclick='hideMiscMenu'> - - - Hide Menu - - - </a>
     </div>
     <div id='miscMenu' style='clear:right;'>
     
@@ -71,7 +71,7 @@
     <div id='chatbox'>
       <div id='chatHistory'>
         <div id='chatHistoryAnnouncement'>
-        Welcome to The World Exchange chat box, run entirely decentralized via blockchain! All messages are stored on the Ripple ledger forever and visible to anyone any time. Each message costs a fraction of XRP (<span id='feeAnnouncement'>0.000012</span>) due to minimum transaction cost + size but nothing more. Display names will be added in next update.<br /><hr />
+        Welcome to The World Exchange Chat Box, run entirely decentralized via blockchain! All messages are recorded forever, timestamped, unchangeable, and visible to anyone. It doubles as free blockchain-based notary for indisputable proof you said something. Each message costs <span id='feeAnnouncement'>0.000012</span> XRP (&lt;$0.00001) due to minimum transaction cost + size but nothing more. Display names will be added in next update.<br /><hr />
         </div>
         <div id='chatHistoryContents'>
         
@@ -258,7 +258,7 @@
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Imagine being able to send money, credit, assets - any form of ownership or value - to anyone anywhere in the world in mere seconds.  Then imagine being able to trade or bid on those same items online with anyone else in the world.  And finally imagine being able to actually issue your <i>own</i> symbols as well to represent anything you can think of - and then let people send or trade that just as openly as they trade anything else, its value determined completely by the free market.  That's what The World Exchange is, and it does this by using the <a href='https://en.wikipedia.org/wiki/Ripple_(payment_protocol)' target='_blank'>Ripple</a> protocol - a technology allowing for truly decentralized exchanges with no downtime and no middlemen in control of your funds.</p>
           
           <h5 id='instant'><a href='#instant' style='text-decoration:none; border:0;'>Near-Instantaneous, Auditable Transactions and Settlements</a></h5>
-          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Say goodbye to ACH, bank wires, SWIFT, T+2 settlement, and other slow 20th century financial technologies.  Money and virtually any other asset can now be sent in mere seconds anywhere in the world, and unlike Bitcoin or other Blockchain-based technologies, you never have to deal with any currency other than the one you're using.  Everything is automatically and seamlessly converted in between without anyone ever having to see it.  Instead of just using USD to buy a symbol XYZ, you can now directly buy XYZ with another asset ABC.  If something is offered in exchange for USD, it is automatically also offered in EUR, BTC, XRP, and all other pairs.  All the liquidity and conversion is done behind the scenes so that all markets for every symbol out there is essentially on one global, interconnected orderbook.  You can essentially now send and trade pure value in near real-time.  No more worrying about what currency to convert to first or what cross-pairs have the best pricing.  Best of all, everything is automatically recorded and auditable with no work on your end.</p>
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Say goodbye to ACH, bank wires, SWIFT, T+2 settlement, and other slow 20th century financial technologies.  Money and virtually any other asset can now be sent in mere seconds anywhere in the world, and unlike Bitcoin or other Blockchain-based technologies, you never have to deal with any currency other than the one you're using.  Everything is automatically and seamlessly converted in between without anyone ever having to see it.  Instead of just using USD to buy a symbol XYZ, you can now directly buy XYZ with another asset ABC.  If something is offered in exchange for USD, it is automatically also offered in EUR, BTC, XRP, and all other pairs.  All the liquidity and conversion is done behind the scenes so that all markets for every symbol out there is essentially on one global, interconnected orderbook.  You can essentially now send and trade pure value in near real-time.  No more worrying about what currency to convert to first or what cross-pairs have the best pricing.  Best of all, everything is automatically recorded permanantly and publicly auditable by anyone with no work on your end.</p>
           
 
           <h5 id='represent'><a href='#represent' style='text-decoration:none; border:0;'>Issue Tokens to Represent Any Form of Value or Ownership</a></h5>
@@ -267,9 +267,9 @@
           <li>Represent your company, its shares, or debt - aka, an IPO / ITO / ICO or bond offering.</li>
           <li>Fundraise for an idea, project, or cause - aka crowdfunding.</li>
           <li>Represent yourself for a loan - aka peer-to-peer lending or crowdsourced credit score.</li>
-          <li>Show proof of transactions, receipts - aka automated audit trail, peer-to-peer notary.</li>
           <li>Offer rewards, gift cards, game currencies - anything redeemable in real world.</li>
-          <li>Store information permanently and forever - archives, wikis, even the chat on this very site.</li>
+          <li>Show indisputable proof of record by attaching text on each transaction - automated audit trail, peer-to-peer notary.</li>
+          <li>Similarly store information permanently and forever - archives, wikis, even the chat on this very site.</li>
           </ul>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;And pretty much anything else you can creatively think of.  There is no coding required and no dealing with complicated smart contracts.  Everything is just point and click, and you don't have to host a single server or database.  The token is then be openly tradable with its price determined entirely by the free market, just like with any stock, bond, rating, currency, etc.  In addition, thanks to the automatic conversion behind the scenes, you only need to offer the symbol once for it to automatically be available across every symbol there is, instantly accepting any form of exchange without additional effort.</p>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At some point, you would either buy back the token you issued or offer some other form of exchange/reward/redemption to give it value.  The trust that you do that is why people would buy or accept your token in the real world.  It is your job to enforce and communicate that promise.  It is no different than a credit card issued by a bank, a gift card issued by a store, someone buying a stock on the trust that the company makes money for its shareholders, or a loan being offered on the trust that the borrower pays it back with interest.  Those that break that trust would find it difficult to do business in the future, just like with anything else in the real world.  The most important part is that every transaction on the exchange is permanent and there for all to see, so no one can ever lie and get away with it.</p>
@@ -323,7 +323,6 @@
         $("#particles-js").css("height", ($(window).height()-70-5)+"px");
         $("#loginBackground").css("height", ($(window).height())+"px");
       </script>
-    
 
 
 </body>
