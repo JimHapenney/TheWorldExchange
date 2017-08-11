@@ -611,6 +611,7 @@ function showMiscMenu() {
   document.getElementById("hideMiscMenu").style.display="block";  
   refreshImmediately = true; 
   rescaleWindow();
+  rescaleWindow();
 }
 function hideMiscMenu() {
   document.getElementById("miscMenu").style.display="none"; 
@@ -3061,7 +3062,7 @@ function sendChat() {
 function chatFullScreen() {
   if(isMobile()) { // bottom half of page
     $("#chatbox").css("width", $(window).width()-10);
-    $("#chatbox").css("height", ($("#footer").offset().top+$("#footer").height()-($("#subnavigation").offset().top + $("#subnavigation").height()))*.98);
+    $("#chatbox").css("height", ($("#container").height()-($("#subnavigation").offset().top + $("#subnavigation").height()))*.98);
     $("#chatbox").css("left", 0);
     $("#chatbox").css("bottom", 0);
     $("#chatbox").css("top", "auto" );
@@ -3089,7 +3090,7 @@ function chatIsFullScreen() {
   var isFull = false;
   // bottom half of page
     if(!isFull) isFull = $("#chatbox").width()*1.1>=$(window).width()-10 
-    && $("#chatbox").height()*1.1>= $("#footer").offset().top+$("#footer").height() - $("#orderbook").offset().top-30;
+    && $("#chatbox").height()*1.1>= ($("#container").height()-($("#subnavigation").offset().top + $("#subnavigation").height()))*.98;
   // center over orderbook
     if(!isFull) isFull = $("#chatbox").width()*1.1>=$("#submit").offset().left + $("#submit").width() - $("#action").offset().left 
     && $("#chatbox").height()*1.1>= $("#footer").offset().top+$("#footer").height() - $("#orderbook").offset().top-30;
