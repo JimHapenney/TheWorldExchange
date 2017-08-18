@@ -776,6 +776,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
         //if( /iPhone/i.test(navigator.userAgent) ) return null; // broken on iphone, freezes
         
         console.log("Requesting orderbook: "+symbol1+"."+issuer1+" x "+symbol2+"."+issuer2);
+        
         return api.getOrderbook(address=="" || address.length<=10?  Object.keys(issuerNames)[0]:address, getPair(symbol1, issuer1, symbol2, issuer2), {limit:bookdepth+5}); 
       }
       catch (ex) {
@@ -802,7 +803,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
     
     // work in progress, disabled until next vers
     // First bridged orderbook
-    if(false && !updateMessageOnly
+    if(!updateMessageOnly
      && symbol1!=baseCurrency && symbol2 != baseCurrency) {
       console.log("Requesting orderbook for bridging left: "+symbol1+"."+issuer1+" x "+baseCurrency);
       return api.getOrderbook(address=="" || address.length<=10?  Object.keys(issuerNames)[0]:address, getPair(symbol1, issuer1, baseCurrency, ""), {limit:bookdepth+5});
@@ -814,7 +815,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
   }).then(function(orderbook1) {
   
   // Work in progress for autobridged orderbooks
-  /*
+  
       bridgedBook1 = orderbook1;
       
       console.log("Left side of bridged book:");
@@ -822,8 +823,8 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
       
       // Second bridged orderbook
       if(bridgedBook1!=null) {
-        console.log("Requesting orderbook for bridging right: "+baseCurrency+" x "+symbol2+"."+issuer2);
-        return api.getOrderbook(address=="" || address.length<=10?  Object.keys(issuerNames)[0]:address, getPair(baseCurrency, "", symbol2, issuer2), {limit:bookdepth+5});
+        console.log("Requesting orderbook for bridging right: "+symbol2+"."+issuer2+" x "+baseCurrency);
+        return api.getOrderbook(address=="" || address.length<=10?  Object.keys(issuerNames)[0]:address, getPair(symbol2, issuer2, baseCurrency, ""), {limit:bookdepth+5});
       }
       else {
         console.log("No left side to bridge orderbooks.");
@@ -845,18 +846,50 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
         if(!updateMessageOnly && showOrderbook && bridgedBook1!=null && bridgedBook2!=null) {
           showOrderbook = true; // in case the main book has no orders and shut this off
           
-          if(currentOrderbook==null) orderbook = {bids:[], asks:[]};
+          if(currentOrderbook==null) currentOrderbook = {bids:[], asks:[]};
           
-          // mainbook = symbol1 for symbol2 = symbol1/symbol2 - ex: BTC for USD = BTC/XRP
-          // mainbook bid = bridgeBook1 ask x bridgeBook2 bid = symbol1/xrp x xrp/symbol2 - ex: BTC/XRP x XRP/USD
-          // mainbook ask = bridgeBook1 bid x bridgeBook2 ask = xrp/symbol1 x symbol2/xrp - ex: XRP/BTC x USD/XRP
+          // mainbook = symbol1 for symbol2 - ex: BTC for USD
+          // bridgedBook1 = symbol1 for XRP - ex: BTC for XRP
+          // bridgedBook2 = symbol2 for XRP - ex: USD for XRP
+          // mainbook ask = selling symbol2 for xrp + buying symbol1 with XRP = bridgedBook2 bid + bridgedBook1 ask
+          // mainbook bid = selling symbol1 for xrp + buying symbol2 with XRP = bridgedBook1 bid + bridgedBook2 ask
           
-          // build left bridge first (mainbook bid)
-          var j = 0; // to iterate through bridgeBook2 bids
-          var orderbook = bridgedBook1;
-          var bids = [];
-          var asks = [];
-          for(var i=0; i<orderbook.asks.length; i++) { // iterate through bridgeBook1 asks
+          // collect all the bids and asks first and sort them
+          var bids1 = [];
+          var bids2 = [];
+          var asks1 = [];
+          var asks2 = [];
+          
+          var orderbook = bridgedBook1; // symbol1 for xrp
+          
+          // Bid side of the orderbook
+          for(var i=0; i<orderbook.bids.length; i++) {
+           if(i<orderbook.bids.length && orderbook.bids[i].specification.quantity.value!=0) {
+              var row1 = ""; var bid = 0; var q1 = 0; var counterparty = ""; var counterparty2 = ""; var s1 = ""; var s2="";
+              if(orderbook.bids[i].state!=null && orderbook.bids[i].state.fundedAmount!=null && orderbook.bids[i].state.fundedAmount.value>0) {
+                 bid = (1.00000000*orderbook.bids[i].specification.totalPrice.value)/(1.00000000*orderbook.bids[i].specification.quantity.value);
+                 counterparty = ""+orderbook.bids[i].specification.quantity.counterparty;
+                 counterparty2 = ""+orderbook.bids[i].specification.totalPrice.counterparty;
+                 q1=orderbook.bids[i].state.fundedAmount.value / bid;
+                 s1 = orderbook.bids[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.bids[i].specification.quantity.currency in issuers) || (issuers[orderbook.bids[i].specification.quantity.currency].length>0))? "."+counterparty:"");
+                 s2 = orderbook.bids[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.bids[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.bids[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
+                
+              }
+              else {
+                 bid = (1.00000000*orderbook.bids[i].specification.totalPrice.value)/(1.00000000*orderbook.bids[i].specification.quantity.value);
+                 counterparty = ""+orderbook.bids[i].specification.quantity.counterparty;
+                 counterparty2 = ""+orderbook.bids[i].specification.totalPrice.counterparty;
+                 q1=orderbook.bids[i].specification.quantity.value;
+                 s1 = orderbook.bids[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.bids[i].specification.quantity.currency in issuers) || (issuers[orderbook.bids[i].specification.quantity.currency].length>0))? "."+counterparty:"");
+                 s2 = orderbook.bids[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.bids[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.bids[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
+                 
+              }
+                
+                bids1[bids1.length] = {direction:orderbook.bids[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.bids[i].specification.quantity.currency, symbol2:orderbook.bids[i].specification.totalPrice.currency, price:(bid).toFixed(accuracy)};
+            }
+          }
+          
+          for(var i=0; i<orderbook.asks.length; i++) { // iterate through bridgedBook1 asks
             
             // s1 is symbol1, s2 is XRP
             if(orderbook.asks[i].specification.quantity.value!=0) {
@@ -878,43 +911,155 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
                  s2 = orderbook.asks[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.asks[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.asks[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
               }
               
-              // bridgeBook1 asks
-              asks[asks.length] = {direction:orderbook.asks[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.asks[i].specification.quantity.currency, symbol2:orderbook.asks[i].specification.totalPrice.currency, price:(ask).toFixed(accuracy)};
+              // bridgedBook1 asks
+              asks1[asks1.length] = {direction:orderbook.asks[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.asks[i].specification.quantity.currency, symbol2:orderbook.asks[i].specification.totalPrice.currency, price:(ask).toFixed(accuracy)};
             }
           }
           
-          for(var i=0; i<orderbook.asks.length; i++) { // iterate through bridgeBook2 bids
+          var orderbook = bridgedBook2; // xrp for symbol2 
+          for(var i=0; i<orderbook.bids.length; i++) {
+           if(i<orderbook.bids.length && orderbook.bids[i].specification.quantity.value!=0) {
+              var row1 = ""; var bid = 0; var q1 = 0; var counterparty = ""; var counterparty2 = ""; var s1 = ""; var s2="";
+              if(orderbook.bids[i].state!=null && orderbook.bids[i].state.fundedAmount!=null && orderbook.bids[i].state.fundedAmount.value>0) {
+                 bid = (1.00000000*orderbook.bids[i].specification.totalPrice.value)/(1.00000000*orderbook.bids[i].specification.quantity.value);
+                 counterparty = ""+orderbook.bids[i].specification.quantity.counterparty;
+                 counterparty2 = ""+orderbook.bids[i].specification.totalPrice.counterparty;
+                 q1=orderbook.bids[i].state.fundedAmount.value / bid;
+                 s1 = orderbook.bids[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.bids[i].specification.quantity.currency in issuers) || (issuers[orderbook.bids[i].specification.quantity.currency].length>0))? "."+counterparty:"");
+                 s2 = orderbook.bids[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.bids[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.bids[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
+                
+              }
+              else {
+                 bid = (1.00000000*orderbook.bids[i].specification.totalPrice.value)/(1.00000000*orderbook.bids[i].specification.quantity.value);
+                 counterparty = ""+orderbook.bids[i].specification.quantity.counterparty;
+                 counterparty2 = ""+orderbook.bids[i].specification.totalPrice.counterparty;
+                 q1=orderbook.bids[i].specification.quantity.value;
+                 s1 = orderbook.bids[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.bids[i].specification.quantity.currency in issuers) || (issuers[orderbook.bids[i].specification.quantity.currency].length>0))? "."+counterparty:"");
+                 s2 = orderbook.bids[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.bids[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.bids[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
+                 
+              }
+                
+                bids2[bids2.length] = {direction:orderbook.bids[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.bids[i].specification.quantity.currency, symbol2:orderbook.bids[i].specification.totalPrice.currency, price:(bid).toFixed(accuracy)};
+            }
+          }
+          for(var i=0; i<orderbook.asks.length; i++) { // iterate through bridgedBook2 asks
             
-            // s1 is symbol1, s2 is XRP
-            // Bid side of the orderbook
-              if(i<orderbook.bids.length && orderbook.bids[i].specification.quantity.value!=0) {
-                var row1 = ""; var bid = 0; var q1 = 0; var counterparty = ""; var counterparty2 = ""; var s1 = ""; var s2="";
-                if(orderbook.bids[i].state!=null && orderbook.bids[i].state.fundedAmount!=null && orderbook.bids[i].state.fundedAmount.value>0) {
-                   bid = (1.00000000*orderbook.bids[i].specification.totalPrice.value)/(1.00000000*orderbook.bids[i].specification.quantity.value);
-                   counterparty = ""+orderbook.bids[i].specification.quantity.counterparty;
-                   counterparty2 = ""+orderbook.bids[i].specification.totalPrice.counterparty;
-                   q1=orderbook.bids[i].state.fundedAmount.value / bid;
-                   s1 = orderbook.bids[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.bids[i].specification.quantity.currency in issuers) || (issuers[orderbook.bids[i].specification.quantity.currency].length>0))? "."+counterparty:"");
-                   s2 = orderbook.bids[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.bids[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.bids[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
-                  
-                }
-                else {
-                   bid = (1.00000000*orderbook.bids[i].specification.totalPrice.value)/(1.00000000*orderbook.bids[i].specification.quantity.value);
-                   counterparty = ""+orderbook.bids[i].specification.quantity.counterparty;
-                   counterparty2 = ""+orderbook.bids[i].specification.totalPrice.counterparty;
-                   q1=orderbook.bids[i].specification.quantity.value;
-                   s1 = orderbook.bids[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.bids[i].specification.quantity.currency in issuers) || (issuers[orderbook.bids[i].specification.quantity.currency].length>0))? "."+counterparty:"");
-                   s2 = orderbook.bids[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.bids[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.bids[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
-                   
-                }
-                  
-                  bids[bids.length] = {direction:orderbook.bids[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.bids[i].specification.quantity.currency, symbol2:orderbook.bids[i].specification.totalPrice.currency, price:(bid).toFixed(accuracy)};
-                  bidTotal+=parseFloat(q1);
+            // s1 is XRP, s2 is symbol2
+            if(orderbook.asks[i].specification.quantity.value!=0) {
+              var row2 = ""; var ask = 0; var counterparty = ""; var counterparty2 = ""; var q1 = 0; var s1 = ""; var s2 = "";
+              if(orderbook.asks[i].state!=null && orderbook.asks[i].state.fundedAmount!=null && orderbook.asks[i].state.fundedAmount.value>0) {
+                 ask = (1.00000000*orderbook.asks[i].specification.totalPrice.value)/(1.00000000*orderbook.asks[i].specification.quantity.value);
+                 counterparty = ""+orderbook.asks[i].specification.quantity.counterparty;
+                 counterparty2 = ""+orderbook.asks[i].specification.totalPrice.counterparty;
+                 q1=orderbook.asks[i].state.fundedAmount.value;
+                 s1 = orderbook.asks[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.asks[i].specification.quantity.currency in issuers) || (issuers[orderbook.asks[i].specification.quantity.currency].length>0))? "."+counterparty:"");
+                 s2 = orderbook.asks[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.asks[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.asks[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
+              }
+              else {
+                 ask = (1.00000000*orderbook.asks[i].specification.totalPrice.value)/(1.00000000*orderbook.asks[i].specification.quantity.value);
+                 counterparty = ""+orderbook.asks[i].specification.quantity.counterparty;
+                 counterparty2 = ""+orderbook.asks[i].specification.totalPrice.counterparty;
+                 q1=orderbook.asks[i].specification.quantity.value;
+                 s1 = orderbook.asks[i].specification.quantity.currency + (counterparty!="undefined" && (!(orderbook.asks[i].specification.quantity.currency in issuers) || (issuers[orderbook.asks[i].specification.quantity.currency].length>0))? "."+counterparty:"");
+                 s2 = orderbook.asks[i].specification.totalPrice.currency + (counterparty2!="undefined" && (!(orderbook.asks[i].specification.totalPrice.currency in issuers) || (issuers[orderbook.asks[i].specification.totalPrice.currency].length>0))? "."+counterparty2:"");
               }
               
-              // bridgeBook2 bids
-              asks[asks.length] = {direction:orderbook.asks[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.asks[i].specification.quantity.currency, symbol2:orderbook.asks[i].specification.totalPrice.currency, price:(ask).toFixed(accuracy)};
+              // bridgedBook2 asks
+              asks2[asks2.length] = {direction:orderbook.asks[i].specification.direction, counterparty:counterparty, counterparty2:counterparty2, qty:parseFloat(q1), symbol1complete:s1, symbol2complete:s2, symbol1:orderbook.asks[i].specification.quantity.currency, symbol2:orderbook.asks[i].specification.totalPrice.currency, price:(ask).toFixed(accuracy)};
+            }
           }
+          
+          
+          // Sort the bid/asks by price
+          bids1.sort(function(a,b) {
+              return  b.price - a.price;
+          });
+          asks1.sort(function(a,b) {
+              return a.price - b.price;
+          });
+          bids2.sort(function(a,b) {
+              return  b.price - a.price;
+          });
+          asks2.sort(function(a,b) {
+              return a.price - b.price;
+          });
+          
+          // mainbook ask = selling symbol2 for xrp + buying symbol1 with XRP = bridgedBook2 bid + bridgedBook1 ask
+          var j = 0; // to iterate through bridgedBook1 asks
+          for(var i=0; i<bids2.length; i++) { // iterate through bridgedBook2 bids
+            var symbol2Left = bids2[i].qty; 
+            var totalSymbol2Sold = 0; 
+            var symbol2PriceInXRP = bids2[i].price; // XRP/symbol2
+            var symbol1Received = 0; 
+            
+            // cross the bid/asks
+            while(symbol2Left>0 && j<asks1.length) {
+              if(asks1[j].qty<=0) { // Ignore empty orders
+                j++;
+                continue;
+              }
+              var symbol1AvailableToBuy = asks1[j].qty;
+              var symbol1PriceInXRP = asks1[j].price; // XRP/symbol1
+              var symbol1PriceInSymbol2 = symbol1PriceInXRP/symbol2PriceInXRP; // symbol2/symbol1 = 1/(XRP/symbol2)*XRP/symbol1
+              var symbol1ConvertedToSymbol2 = symbol1AvailableToBuy*symbol1PriceInSymbol2;
+              var symbol2Sold = Math.min(symbol2Left, symbol1ConvertedToSymbol2);
+              symbol2Left-= symbol2Sold;
+              totalSymbol2Sold += symbol2Sold;
+              var symbol2SoldConvertedSymbol1 = symbol2Sold/symbol1PriceInSymbol2;
+              symbol1Received += symbol2SoldConvertedSymbol1;
+            }
+            
+            
+            // Add this the right side of the main book
+            currentOrderbook.asks[currentOrderbook.asks.length] = {
+              specification: {
+                quantity: {currency:symbol1, counterparty:issuer1, value:symbol1Received},
+                totalPrice: {currency:symbol2, counterparty:issuer2, value:totalSymbol2Sold},
+                direction: "sell"
+              }
+            };
+            
+            if(symbol2Left>0 || j>=asks1.length) break; // not enough bids to match with asks
+          }
+          
+          // mainbook bid = selling symbol1 for xrp + buying symbol2 with XRP = bridgedBook1 bid + bridgedBook2 ask
+          j = 0; // to iterate through bridgedBook2 asks 
+          for(var i=0; i<bids1.length; i++) { // iterate through bridgedBook2 bids
+            var symbol1Left = bids1[i].qty; 
+            var totalSymbol1Sold = 0; 
+            var symbol1PriceInXRP = bids1[i].price; // XRP/symbol1
+            var symbol2Received = 0; 
+            
+            // cross the bid/asks
+            while(symbol1Left>0 && j<asks2.length) {
+              if(asks2[j].qty<=0) { // Ignore empty orders
+                j++;
+                continue;
+              }
+              var symbol2AvailableToBuy = asks2[j].qty;
+              var symbol2PriceInXRP = asks2[j].price; // XRP/symbol2
+              var symbol2PriceInSymbol1 = symbol2PriceInXRP/symbol1PriceInXRP; // symbol1/symbol2 = 1/(XRP/symbol1)*XRP/symbol2
+              var symbol2ConvertedToSymbol1 = symbol2AvailableToBuy*symbol2PriceInSymbol1;
+              var symbol1Sold = Math.min(symbol1Left, symbol2ConvertedToSymbol1);
+              symbol1Left-= symbol1Sold;
+              totalSymbol1Sold += symbol1Sold;
+              var symbol1SoldConvertedSymbol2 = symbol1Sold/symbol2PriceInSymbol1;
+              symbol2Received += symbol1SoldConvertedSymbol2;
+            }
+            
+            
+            // Add this the left side of the main book
+            currentOrderbook.bids[currentOrderbook.bids.length] = {
+              specification: {
+                quantity: {currency:symbol1, counterparty:issuer1, value:totalSymbol1Sold},
+                totalPrice: {currency:symbol2, counterparty:issuer2, value:symbol2Received},
+                direction: "buy"
+              }
+            };
+            
+            if(symbol1Left>0 || j>=asks2.length) break; // not enough bids to match with asks
+          }
+          
         }
       }
       catch(ex) {
@@ -925,7 +1070,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
       console.log("Error combining bridged orderbooks: "+err);
       return null;
   }).then(function() {
-  */
+  
   
     // Display the final orderbook
   
