@@ -984,6 +984,8 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
               return a.price - b.price;
           });
           
+          
+          
           // mainbook ask = selling symbol2 for xrp + buying symbol1 with XRP = bridgedBook2 bid + bridgedBook1 ask
           var j = 0; // to iterate through bridgedBook1 asks
           for(var i=0; i<bids2.length; i++) { // iterate through bridgedBook2 bids
@@ -1073,8 +1075,6 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
   
   
     // Display the final orderbook
-  
-    //console.log(orderbook);
     
     var orderbook = currentOrderbook;
     
@@ -1626,7 +1626,7 @@ function updateSymbol2() {
 
 // Calculate whether we should show or hide the orderbook (either we are issuing something and logged in or on the buy/sell tabs)
 function showOrHideOrderbook() {
-  showOrderbook = symbol1!="" && symbol2!="" && symbol1!=symbol2 && (action!="issue" || address!="") && action != "send";
+  showOrderbook = symbol1!="" && symbol2!="" && (symbol1!=symbol2 || issuer1!=issuer2) && (action!="issue" || address!="") && action != "send";
   if(!showOrderbook) $("#orderbook").html(""); // Hide the orderbook instantly if we shouldn't show it
 }
 
@@ -2899,6 +2899,7 @@ function dimBackground() {
   $("#loginBackground").css("display", "block");
   errored = false;
   refreshLayout();
+  if(isMobile()) $("#about").css("display", "none");
 }
 
 function undimBackground() {
@@ -2909,6 +2910,8 @@ function undimBackground() {
   $("body").css("overflow", "auto");
   $("#loginBackground").css("display", "none");
   refreshLayout();
+  
+  if(isMobile()) $("#about").css("display", "block");
 }
 
 // Generate a new account address using Ripple API call
