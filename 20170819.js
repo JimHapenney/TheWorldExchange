@@ -1098,30 +1098,36 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
       }
     }
     
+    // Clear error message if the orderbook takes a little bit to load
+    if(action=="issue" && errored && !$.trim( $('#orderbook').html() ).length) {
+      errored = false;
+    }
+    
     // If we don't already have an error, display the default page description depending on the action selected
     // To prevent this block from displaying the default page description, set errored=true, which gets reset to false on any action, symbol, or setting changes
-    if(!errored) {
-      if(action!="issue" && action!="send" && $.trim( $('#orderbook').html() ).length) {
-        $("#errors").html("&nbsp;");
-        refreshLayout();
-      }
-      else if(action=="issue" && symbol1!="" && symbol1!=baseCurrency && orderbook!=null && Math.max(orderbook.bids.length, orderbook.asks.length)>0) {
-        errored=true;
-        $("#errors").html("Share the below link to let others trade your "+symbol1+" token:<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' /><br /><br />For next steps to consider, such as drafting legal documentation, make sure to see: <br /><a href='#ico' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#ico\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#ico\").offset().top}, 1000); return false;'>Extra Considerations for Creating a Token Offering</a>");
-        refreshLayout();
-      }
-      else if(action=='issue' && (symbol1=="" || orderbook==null)) {
-          errored=true;
-          $("#errors").html("Issue your own token for others trade and represent anything you can think of.<br />Token symbols must be exactly 3 letters and cannot be '"+baseCurrency+"'.<br /><br />Offer your symbol for "+baseCurrency+" to automatically offer for every symbol<br /> and accept any form of exchange. (think of it as a wildcard)<br /><br />See: <a href='#represent' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#represent\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#represent\").offset().top}, 1000); return false;'>Issue Tokens to Represent Any Form of Value or Ownership</a>");
-          refreshLayout();
-      }
-      else if(action=='send') {
-          errored=true;
-          $("#errors").html("Send to others by inputting their account address above.<br /><br />To receive or let others send to you, share the below link:<br /><input type='text' value='https://www.theworldexchange.net/?action=send&amp;recipient="+address+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
-          refreshLayout();
-      }
-      else refreshLayout();
+    if(!errored && action!="issue" && action!="send" && $.trim( $('#orderbook').html() ).length) {
+      $("#errors").html("&nbsp;");
+      refreshLayout();
     }
+    else if(!errored && action=="issue" && symbol1!="" && symbol1!=baseCurrency && (orderbookExists || orderbook!=null || Math.max(orderbook.bids.length, orderbook.asks.length)>0)) {
+      errored=true;
+      var issuedText = "Share the below link to let others trade your "+symbol1+" token:<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' /><br /><br />For next steps to consider, such as drafting legal documentation, see: <br /><a href='#ico' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#ico\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#ico\").offset().top}, 1000); return false;'>Extra Considerations for Creating a Token Offering</a><br /><br />"+(settings["defaultRipple"]? "Your settings allow token holders to both trade and send to others.<br />To disallow sending so users can only trade in the open market, click <a href='#' onclick='updateDefaultRipple(false);'>here</a>.":"Your settings only allow token holders to trade but not send to others.<br />To allow users to send to others as well, click <a href='#' onclick='updateDefaultRipple(true);'>here</a>.");
+      if(stripHTML($("#errors").html())!=stripHTML(issuedText)) {
+        $("#errors").html(issuedText);
+        refreshLayout();
+      }
+    }
+    else if(!errored && action=='issue' && !orderbookExists && (symbol1=="" || orderbook==null)) {
+        errored=true;
+        $("#errors").html("Issue your own token for others trade and represent anything you can think of.<br />Token symbols must be exactly 3 letters and cannot be '"+baseCurrency+"'.<br /><br />Offer your symbol for "+baseCurrency+" to automatically offer for every symbol<br /> and accept any form of exchange. (think of it as a wildcard)<br /><br />See: <a href='#represent' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#represent\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#represent\").offset().top}, 1000); return false;'>Issue Tokens to Represent Any Form of Value or Ownership</a>");
+        refreshLayout();
+    }
+    else if(!errored && action=='send') {
+        errored=true;
+        $("#errors").html("Send to others by inputting their account address above.<br /><br />To receive or let others send to you, share the below link:<br /><input type='text' value='https://www.theworldexchange.net/?action=send&amp;recipient="+address+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
+        refreshLayout();
+    }
+    else if(!errored) refreshLayout();
     
     // Parse through the orderbook and turn it into an HTML table
     if(!updateMessageOnly && showOrderbook && orderbook!=null && orderbookExists) {
@@ -2509,9 +2515,70 @@ function hideSettings() {
   $("#settings").css("display", "none");
 }
 
+// One off call to update defaultRipple
+function updateDefaultRipple(enableRippling) {
+  if(address!="" && key!="") {
+    if(enableRippling) showPopup("Allowing token holders to send to others...", "Allowing Token Holders to Send to Others...");
+    else showPopup("Disallowing token holders from sending to others...", "Disallowing Token Holders From Sending to Others...");
+    
+    noDisconnecting = true; // disable periodic disconnects/reconnects for connection refresh
+    try {
+      $("#popupText").append("<br />Setting defaultRipple = "+enableRippling);
+      var singleSetting = { };
+      singleSetting["defaultRipple"] = enableRippling;
+      settings["defaultRipple"] = enableRippling;
+      
+      api.prepareSettings(address, singleSetting).then(function(prepared) {
+          var transaction = "";
+          var transactionID = -1;
+          try {
+            var result = api.sign(prepared.txJSON, key);
+            transaction = result.signedTransaction;
+            transactionID = result.id;
+          }
+          catch(er) {
+            errored = true;
+            $("#popupText").append("<br /> - Error signing update to defaultRipple: "+er);
+            refreshLayout();
+          }
+          
+          if(transaction!="") {
+            api.submit(transaction).then(function(result) {
+              errored = true; // Set to true to avoid refresh loop from clearing
+              
+              // Friendlier messages
+              if(result.resultCode=="tesSUCCESS")
+                $("#popupText").append("<br /> - defaultRipple setting updated.");
+              else if(result.resultCode=="terQUEUED") $("#popupText").append("<br /> - defaultRipple update queued due to high load on network. Check back in a few minutes to confirm completion and retry if not.");
+              else $("#popupText").append("<br /> - Error for updating defaultRipple setting ("+result.resultCode+"): "+result.resultMessage);
+              noDisconnecting = false; // allow periodic disconnects/reconnects to refresh connection
+              
+            }, function (err) {
+              errored = true; // Set to true to avoid refresh loop from clearing
+              $("#popupText").append("<br /> - Error updating defaultRipple setting: "+err);
+              noDisconnecting = false;
+            }).then(function() {
+              // Batch update trustlines in case
+              updateRippling1(enableRippling);
+            });
+          }
+          else noDisconnecting = false; // re-enable periodic disconnects/reconnects to refresh connection
+      }, function(err) {
+          errored = true; // Set to true to avoid refresh loop from clearing
+          $("#popupText").append("<br />Error updating defaultRipple setting: "+err); 
+          noDisconnecting = false; // re-enable periodic disconnects/reconnects to refresh connection
+      });
+    }
+    catch(exx) {errored = true; $("#popupText").append("<br />Error updating defaultRipple: "+exx); noDisconnecting = false; }
+  }
+  else {
+    loginWarning();
+  }
+}
+
 // Mass update all trustlines to set rippling
 function updateRippling1(enableRippling) {
-  $("#popupText").append("<br /><br />defaultRipple setting updated.  Batch updating all trustlines to reflect new rippling preference.  Please wait...");
+  $("#popupText").append("<br /><br />Batch updating all trustlines to reflect new defaultRipple setting (permission for token holders to send your token to others).  Please wait...");
   noDisconnecting = true;
   api.getTrustlines(address).then(function(lines) {
     noDisconnecting = false;
@@ -2523,7 +2590,7 @@ function updateRippling1(enableRippling) {
 // Loop through each trustline update one at a time, by requirement of the Ripple API
 function updateRippling2(enableRippling, lines, i) {
   if(i>=lines.length) {
-    $("#popupText").append("<br />Finished updating all trustlines to set rippling to "+enableRippling+"."); 
+    $("#popupText").append("<br />Finished updating all trustlines to set rippling to "+enableRippling+" ("+(enableRippling? "":"not ")+"allowing token holders to send your token to others)."); 
   }
   else if(address!="" && key!="") {
     var symbol = lines[i].specification.currency;
@@ -2548,7 +2615,7 @@ function updateRippling2(enableRippling, lines, i) {
           transactionID = result.id;
         }
         catch(er) {
-          $("#popupText").append("<br /> - Error signing rippling update for "+symbol+" / "+backer+": "+er);
+          $("#popupText").append("<br /> - Error signing rippling update: "+er);
         }
         
         if(transaction!="") {
@@ -2557,13 +2624,13 @@ function updateRippling2(enableRippling, lines, i) {
             noDisconnecting = false;
             
             // Friendlier messages when we can
-            if(result.resultCode=="tesSUCCESS") $("#popupText").append("<br /> - Completed rippling update for "+symbol+" by "+backer+". (See <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>transaction details</a>)");
+            if(result.resultCode=="tesSUCCESS") $("#popupText").append("<br /> - Completed rippling update. (See <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>transaction details</a>)");
             else if(result.resultCode=="terQUEUED") $("#popupText").append("<br /> - Rippling update queued due to high load on network. Check back in a few minutes to confirm completion and retry if not.");
-            else $("#popupText").append("<br /> - Error for updating rippling for "+symbol+" by "+backer+" ("+result.resultCode+"): "+result.resultMessage+" (See <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>transaction details</a>)");
+            else $("#popupText").append("<br /> - Error for updating rippling setting ("+result.resultCode+"): "+result.resultMessage+" (See <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>transaction details</a>)");
             
           }, function (err) {
             noDisconnecting = false;
-            $("#popupText").append("<br /> - Error updating rippling for "+symbol+" by "+backer+": "+err);
+            $("#popupText").append("<br /> - Error updating rippling: "+err);
             
           }).then(function() {
           
@@ -2574,7 +2641,7 @@ function updateRippling2(enableRippling, lines, i) {
         }
         else noDisconnecting = false;
     }, function (er) {
-        $("#popupText").append("<br /> - Error preparing rippling update for "+symbol+" by "+backer+": "+err);
+        $("#popupText").append("<br /> - Error preparing rippling update: "+err);
         noDisconnecting = false;
     });
   }
