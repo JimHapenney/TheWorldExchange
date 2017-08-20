@@ -996,47 +996,49 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
           
           
           // mainbook ask = selling symbol2 for xrp + buying symbol1 with XRP = bridgedBook2 bid + bridgedBook1 ask
-          var j = 0; // to iterate through bridgedBook1 asks
-          for(var i=0; i<bids2.length; i++) { // iterate through bridgedBook2 bids
-            var symbol2Left = bids2[i].qty; 
-            var totalSymbol2Sold = 0; 
-            var symbol2PriceInXRP = bids2[i].price; // XRP/symbol2
-            var symbol1Received = 0; 
+          var j = 0; // to iterate through bridgedBook2 bids
+          var i=0; // iterate through bridgedBook1 asks
+          while( i<asks1.length && j<bids2.length) { // iterate through bridgedBook1 asks
+            var symbol1Left = asks1[i].qty; 
+            var totalSymbol1Sold = 0; 
+            var symbol1PriceInXRP = asks1[i].price; // XRP/symbol1
+            var symbol2Received = 0; 
             
             // cross the bid/asks
-            while(symbol2Left>0 && j<asks1.length) {
-              if(asks1[j].qty<=0) { // Ignore empty orders
+            while(symbol1Left>0 && j<bids2.length) {
+              if(bids2[j].qty<=0) { // Ignore empty orders
                 j++;
-                continue;
+                break;
               }
-              var symbol1AvailableToBuy = asks1[j].qty;
-              var symbol1PriceInXRP = asks1[j].price; // XRP/symbol1
-              var symbol1PriceInSymbol2 = symbol1PriceInXRP/symbol2PriceInXRP; // symbol2/symbol1 = 1/(XRP/symbol2)*XRP/symbol1
-              var symbol1ConvertedToSymbol2 = symbol1AvailableToBuy*symbol1PriceInSymbol2;
-              var symbol2Sold = Math.max(0, Math.min(symbol2Left, symbol1ConvertedToSymbol2));
-              symbol2Left-= symbol2Sold;
-              totalSymbol2Sold += symbol2Sold;
-              var symbol2SoldConvertedSymbol1 = symbol2Sold/symbol1PriceInSymbol2;
-              symbol1Received += symbol2SoldConvertedSymbol1;
-              asks1[j].qty-=symbol2SoldConvertedSymbol1;
+              var symbol2AvailableToBuy = bids2[j].qty;
+              var symbol2PriceInXRP = bids2[j].price; // XRP/symbol2
+              var symbol2PriceInSymbol1 = symbol2PriceInXRP/symbol1PriceInXRP; // symbol1/symbol2 = 1/(XRP/symbol1)*XRP/symbol2
+              var symbol2ConvertedToSymbol1 = symbol2AvailableToBuy*symbol2PriceInSymbol1;
+              var symbol1Sold = Math.max(0, Math.min(symbol1Left, symbol2ConvertedToSymbol1));
+              symbol1Left-= symbol1Sold;
+              totalSymbol1Sold += symbol1Sold;
+              var symbol1SoldConvertedSymbol2 = symbol1Sold/symbol2PriceInSymbol1;
+              symbol2Received += symbol1SoldConvertedSymbol2;
+              bids2[j].qty-=symbol1SoldConvertedSymbol2;
             }
-            
             
             // Add this the right side of the main book
             currentOrderbook.asks[currentOrderbook.asks.length] = {
               specification: {
-                quantity: {currency:symbol1, counterparty:issuer1, value:symbol1Received},
-                totalPrice: {currency:symbol2, counterparty:issuer2, value:totalSymbol2Sold},
+                quantity: {currency:symbol1, counterparty:issuer1, value:totalSymbol1Sold},
+                totalPrice: {currency:symbol2, counterparty:issuer2, value:symbol2Received},
                 direction: "sell"
               }
             };
             
-            if(symbol2Left>0 || j>=asks1.length) break; // not enough bids to match with asks
+            asks1[i].qty = symbol1Left;
+            if(symbol1Left<=0) i++;
           }
           
           // mainbook bid = selling symbol1 for xrp + buying symbol2 with XRP = bridgedBook1 bid + bridgedBook2 ask
           j = 0; // to iterate through bridgedBook2 asks 
-          for(var i=0; i<bids1.length; i++) { // iterate through bridgedBook2 bids
+          i = 0; // iterate through bridgedBook1 bids
+          while(i<bids1.length && j<asks2.length) { // iterate through bridgedBook2 bids
             var symbol1Left = bids1[i].qty; 
             var totalSymbol1Sold = 0; 
             var symbol1PriceInXRP = bids1[i].price; // XRP/symbol1
@@ -1046,7 +1048,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
             while(symbol1Left>0 && j<asks2.length) {
               if(asks2[j].qty<=0) { // Ignore empty orders
                 j++;
-                continue;
+                break;
               }
               var symbol2AvailableToBuy = asks2[j].qty;
               var symbol2PriceInXRP = asks2[j].price; // XRP/symbol2
@@ -1070,7 +1072,8 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
               }
             };
             
-            if(symbol1Left>0 || j>=asks2.length) break; // not enough bids to match with asks
+            bids1[i].qty = symbol1Left;
+            if(symbol1Left<=0) i++;
           }
           
         }
