@@ -386,9 +386,8 @@ function loadAccount(loadOrderbookNext=false) {
             for(var i=0; i<balances.length; i++) {
               if(balances[i].value==0) continue;
               if(balanceOutput!="") balanceOutput+=", ";
-              var counterparty = ""+balances[i].counterparty;
-              if(balances[i].value<0) counterparty = address;
-              var s = balances[i].currency + (counterparty!="undefined" && (!(balances[i].currency in issuers) || (issuers[balances[i].currency].length>0))? "."+counterparty:"");
+              var counterparty = address;
+              var s = balances[i].currency + "."+counterparty;
               
               if(!(s in holdings)) holdings[s] = 0;
               
@@ -1099,35 +1098,37 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
     }
     
     // Clear error message if the orderbook takes a little bit to load
-    if(action=="issue" && errored && !$.trim( $('#orderbook').html() ).length) {
+    if(action=="issue" && errored && address!="" && !$.trim( $('#orderbook').html() ).length) {
       errored = false;
     }
     
     // If we don't already have an error, display the default page description depending on the action selected
     // To prevent this block from displaying the default page description, set errored=true, which gets reset to false on any action, symbol, or setting changes
-    if(!errored && action!="issue" && action!="send" && $.trim( $('#orderbook').html() ).length) {
-      $("#errors").html("&nbsp;");
-      refreshLayout();
-    }
-    else if(!errored && action=="issue" && symbol1!="" && symbol1!=baseCurrency && (orderbookExists || orderbook!=null || Math.max(orderbook.bids.length, orderbook.asks.length)>0)) {
-      errored=true;
-      var issuedText = "Share the below link to let others trade your "+symbol1+" token:<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' /><br /><br />For next steps to consider, such as drafting legal documentation, see: <br /><a href='#ico' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#ico\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#ico\").offset().top}, 1000); return false;'>Extra Considerations for Creating a Token Offering</a><br /><br />"+(settings["defaultRipple"]? "Your settings allow token holders to both trade and send to others.<br />To disallow sending so users can only trade in the open market, click <a href='#' onclick='updateDefaultRipple(false);'>here</a>.":"Your settings only allow token holders to trade but not send to others.<br />To allow users to send to others as well, click <a href='#' onclick='updateDefaultRipple(true);'>here</a>.");
-      if(stripHTML($("#errors").html())!=stripHTML(issuedText)) {
-        $("#errors").html(issuedText);
+    if(!errored) {
+      if(action!="issue" && action!="send" && $.trim( $('#orderbook').html() ).length) {
+        $("#errors").html("&nbsp;");
         refreshLayout();
       }
-    }
-    else if(!errored && action=='issue' && !orderbookExists && (symbol1=="" || orderbook==null)) {
+      else if(action=="issue" && symbol1!="" && symbol1!=baseCurrency && orderbook!=null && Math.max(orderbook.bids.length, orderbook.asks.length)>0) {
         errored=true;
-        $("#errors").html("Issue your own token for others trade and represent anything you can think of.<br />Token symbols must be exactly 3 letters and cannot be '"+baseCurrency+"'.<br /><br />Offer your symbol for "+baseCurrency+" to automatically offer for every symbol<br /> and accept any form of exchange. (think of it as a wildcard)<br /><br />See: <a href='#represent' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#represent\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#represent\").offset().top}, 1000); return false;'>Issue Tokens to Represent Any Form of Value or Ownership</a>");
-        refreshLayout();
+        var issuedText = getIssuedText();
+        if(stripHTML($("#errors").html())!=stripHTML(issuedText)) {
+          $("#errors").html(issuedText);
+          refreshLayout();
+        }
+      }
+      else if(action=='issue' && (symbol1=="" || orderbook==null)) {
+          errored=true;
+          $("#errors").html("Issue your own token for others trade and represent anything you can think of.<br />Token symbols must be exactly 3 letters and cannot be '"+baseCurrency+"'.<br /><br />Offer your symbol for "+baseCurrency+" to automatically offer for every symbol<br /> and accept any form of exchange. (think of it as a wildcard)<br /><br />See: <a href='#represent' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#represent\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#represent\").offset().top}, 1000); return false;'>Issue Tokens to Represent Any Form of Value or Ownership</a>");
+          refreshLayout();
+      }
+      else if(action=='send') {
+          errored=true;
+          $("#errors").html("Send to others by inputting their account address above.<br /><br />To receive or let others send to you, share the below link:<br /><input type='text' value='https://www.theworldexchange.net/?action=send&amp;recipient="+address+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
+          refreshLayout();
+      }
+      else refreshLayout();
     }
-    else if(!errored && action=='send') {
-        errored=true;
-        $("#errors").html("Send to others by inputting their account address above.<br /><br />To receive or let others send to you, share the below link:<br /><input type='text' value='https://www.theworldexchange.net/?action=send&amp;recipient="+address+"' onclick='this.select();' readonly='readonly' class='linkShare' />");
-        refreshLayout();
-    }
-    else if(!errored) refreshLayout();
     
     // Parse through the orderbook and turn it into an HTML table
     if(!updateMessageOnly && showOrderbook && orderbook!=null && orderbookExists) {
@@ -1306,6 +1307,11 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
     if(repeat && !updateMessageOnly) 
       interruptableTimer(loadOrderbook);
   }
+}
+
+// The help text after you issued a token
+function getIssuedText() {
+  return "Share the below link to let others trade your "+symbol1+" token:<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' /><br /><br />For next steps to consider, such as drafting legal documentation, see: <br /><a href='#ico' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#ico\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#ico\").offset().top}, 1000); return false;'>Extra Considerations for Creating a Token Offering</a><br /><br />"+(settings["defaultRipple"]? "Your settings allow token holders to both trade and send to others.<br />To disallow sending so users can only trade in the open market, click <a href='#' onclick='updateDefaultRipple(false);'>here</a>.":"Your settings only allow token holders to trade but not send to others.<br />To allow users to send to others as well, click <a href='#' onclick='updateDefaultRipple(true);'>here</a>.");
 }
 
 // Update the URL depending on what we put in the forms
@@ -3040,7 +3046,7 @@ function submitTransaction() {
                     errored = true;
                     
                     // Friendlier error messages
-                    if(action=="issue") issueInfo = "<br /><br />Share the below link to let others trade your newly issued "+symbol1+" token:<br /><input type='text' value='https://www.theworldexchange.net/?symbol1="+symbol1+"."+address+"&amp;symbol2="+symbol2+"."+issuer2+"' onclick='this.select();' readonly='readonly' class='linkShare' />";
+                    if(action=="issue") issueInfo = "<br /><br />"+getIssuedText();
                     if(result.resultCode=="tesSUCCESS")
                       $("#errors").html("Order submitted to "+action+" "+qty1+" "+symbol1+"! <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>See Transaction Details...</a>"+issueInfo);
                     else if(result.resultCode=="terQUEUED") $("#errors").html("Order queued due to high load on network. Check <a href='https://charts.ripple.com/#/transactions/"+transactionID+"' target='_blank'>transaction details</a> in a few minutes to confirm if successful and retry if not.");
@@ -3124,6 +3130,7 @@ function loadURLPrice(action, symbol1, price, symbol2) {
       $("#symbol2").val(symbol2);
   }).then(function() {
       if(action!="") updateAction();
+      else errored = false;
   }).then(function() {
     updateSymbols();
   }).then(function () {
@@ -3144,6 +3151,7 @@ function loadURLSymbol(action, qty1, symbol1) {
     $("#symbol1").val(symParts[0]);
   }).then(function() {
       if(action!="") updateAction();
+      else errored = false;
   }).then(function() {
     updateSymbols();
   }).then(function () {
@@ -3163,26 +3171,7 @@ function loadURLSymbols(action, qty1, symbol1, price, symbol2) {
       $("#symbol2").val(symbol2);
   }).then(function() {
       if(action!="") updateAction();
-  }).then(function() {
-    updateSymbols();
-  }).then(function () {
-    updateURL();
-  });
-}
-
-// Update page to load a send transaction
-function loadURLSend(action, qty1, symbol1, recipient) {
-  new Promise(function(resolve, reject) {
-      resolve();
-    }).then(function() {
-      $("#action").val(action);
-      $("#qty1").val(parseFloat(parseFloat(qty).toFixed(accuracy)));
-      var symParts = symbol1.split('.');
-      if(symParts.length>1) issuer1 = symParts[1];
-      else issuer1 = "";
-      $("#recipient").val(recipient);
-  }).then(function() {
-      updateAction();
+      else errored = false;
   }).then(function() {
     updateSymbols();
   }).then(function () {
