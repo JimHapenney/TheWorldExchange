@@ -1014,7 +1014,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
               var symbol1PriceInXRP = asks1[j].price; // XRP/symbol1
               var symbol1PriceInSymbol2 = symbol1PriceInXRP/symbol2PriceInXRP; // symbol2/symbol1 = 1/(XRP/symbol2)*XRP/symbol1
               var symbol1ConvertedToSymbol2 = symbol1AvailableToBuy*symbol1PriceInSymbol2;
-              var symbol2Sold = Math.min(symbol2Left, symbol1ConvertedToSymbol2);
+              var symbol2Sold = Math.max(accuracy, Math.min(symbol2Left, symbol1ConvertedToSymbol2));
               symbol2Left-= symbol2Sold;
               totalSymbol2Sold += symbol2Sold;
               var symbol2SoldConvertedSymbol1 = symbol2Sold/symbol1PriceInSymbol2;
@@ -1052,7 +1052,7 @@ function loadOrderbook(updateMessageOnly = false, repeat = true) {
               var symbol2PriceInXRP = asks2[j].price; // XRP/symbol2
               var symbol2PriceInSymbol1 = symbol2PriceInXRP/symbol1PriceInXRP; // symbol1/symbol2 = 1/(XRP/symbol1)*XRP/symbol2
               var symbol2ConvertedToSymbol1 = symbol2AvailableToBuy*symbol2PriceInSymbol1;
-              var symbol1Sold = Math.min(symbol1Left, symbol2ConvertedToSymbol1);
+              var symbol1Sold = Math.max(accuracy, Math.min(symbol1Left, symbol2ConvertedToSymbol1));
               symbol1Left-= symbol1Sold;
               totalSymbol1Sold += symbol1Sold;
               var symbol1SoldConvertedSymbol2 = symbol1Sold/symbol2PriceInSymbol1;
