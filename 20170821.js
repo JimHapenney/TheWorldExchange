@@ -1247,7 +1247,7 @@ function loadOrderbook(updateMessageOnly, repeat) {
       }
       else if(action=='issue' && (symbol1=="" || orderbook==null || Math.max(orderbook.bids.length, orderbook.asks.length)==0)) {
           errored=true;
-          $("#errors").html("Issue your own token for others trade and represent anything you can think of.<br />Token symbols must be exactly 3 letters and cannot be '"+baseCurrency+"'.<br /><br />Offer your symbol for "+baseCurrency+" to automatically offer for every symbol<br /> and accept any form of exchange. (think of it as a wildcard)<br /><br />Further Learning:<br /><a href='#represent' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#represent\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#represent\").offset().top}, 1000); return false;'>Issue Tokens to Represent Any Form of Value or Ownership</a><br /><a href='https://www.youtube.com/watch?v=Uh4uOVUz42Q&list=PLHAK7FXoElZOyM6MaQ_O_i6ATap2k9r-o&index=6' target='_blank'>How to Issue Your Own Token on Ripple (Video Tutorial)</a>");
+          $("#errors").html("Issue your own token for others trade and represent anything you can think of.<br />Token symbols must be exactly 3 letters and cannot be '"+baseCurrency+"'.<br /><br />Offer your symbol for "+baseCurrency+" to automatically offer for every symbol<br /> and accept any form of exchange. (think of it as a wildcard)<br /><br />See: <a href='#represent' onclick='document.getElementById(\"about\").style.display=\"block\"; setURL(\"#represent\"); jQuery(\"html,body\").animate({scrollTop: jQuery(\"#represent\").offset().top}, 1000); return false;'>Issue Tokens to Represent Any Form of Value or Ownership</a>");
           refreshLayout();
       }
       else if(action=='send') {
