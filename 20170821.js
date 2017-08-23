@@ -3424,7 +3424,9 @@ function runChat() {
             if((!firstRun || i==transactions.length-1) && transactions[i].address!=null && transactions[i].specification!=null 
               && transactions[i].specification.memos!=null && transactions[i].specification.memos.length>0
               && transactions[i].specification.memos[0].data!=null && transactions[i].specification.memos[0].data!="")
-              printChat("<b>"+transactions[i].outcome.timestamp.replace("T", " ").replace(".000Z", "")+" - "+transactions[i].address+":</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+stripHTML(transactions[i].specification.memos[0].data));
+              {
+                printChat("<b>" + formatDate(new Date(transactions[i].outcome.timestamp))+" - "+transactions[i].address+":</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+stripHTML(transactions[i].specification.memos[0].data));
+              }
           }
           catch(ex) {
             console.log("Chat parsing error: "+ex);
@@ -3448,6 +3450,20 @@ function runChat() {
   else {
     setTimeout(runChat, chatUpdateInterval*1000);
   }
+}
+function formatDate(date) {
+  var monthNames = [
+    "Jan", "Feb", "Mar",
+    "Apr", "May", "Jun", "Jul",
+    "Aug", "Sep", "Oct",
+    "Nov", "Dec"
+  ];
+
+  var day = date.getDate();
+  var monthIndex = date.getMonth();
+  var year = date.getFullYear();
+
+  return monthNames[monthIndex]+' '+day + ' ' + year+ ' '+date.toTimeString().split(' ')[0];
 }
 function printChat(msg) {
   var scrolled = $('#chatHistoryContents').scrollTop()+$('#chatHistoryContents').innerHeight()>=$('#chatHistoryContents')[0].scrollHeight*.75;
